@@ -1,0 +1,67 @@
+name: AI for Database
+description: >-
+  AI-powered database platform offering natural-language querying (text-to-SQL), dashboards, reports, and scheduled
+  database workflows with query approval. Exposes a scoped Bearer-auth REST API with a public OpenAPI 3.1 contract, plus
+  agent-native discovery surfaces (llms.txt, llms-full.txt, and a JSON capability manifest). Supports PostgreSQL, MySQL,
+  MongoDB, SQL Server, and Google Sheets.
+url: https://raw.githubusercontent.com/api-evangelist/ai-for-database/refs/heads/main/apis.yml
+created: '2026-08-26'
+modified: '2026-08-26'
+specificationVersion: '0.21'
+tags:
+  - AI
+  - Database
+  - Analytics
+  - Developer Tools
+  - Natural Language Query
+  - Text-to-SQL
+  - Dashboards
+  - BI
+  - Workflow Automation
+  - Agent-Native
+  - LLMSTxt
+  - OpenAPI
+  - Webhooks
+apis:
+  - name: AI for Database API
+    description: >-
+      Scoped Bearer-auth REST API for natural-language queries, chat, connections, dashboards, workflows, webhooks,
+      metrics, saved queries, query approval, usage, and API key management. Documented via a public OpenAPI 3.1 spec
+      and interactive reference.
+    humanURL: https://aifordatabase.com/docs/api-overview/
+    baseURL: https://app.aifordatabase.com/api/v1
+    tags:
+      - AI
+      - Database
+      - Analytics
+      - Developer Tools
+      - Natural Language Query
+      - Text-to-SQL
+      - Dashboards
+      - BI
+      - Workflow Automation
+      - Agent-Native
+      - LLMSTxt
+      - OpenAPI
+      - Webhooks
+    properties:
+      - type: OpenAPI
+        url: https://app.aifordatabase.com/api/v1/openapi.json
+      - type: Documentation
+        url: https://aifordatabase.com/docs/api-overview/
+      - type: Documentation
+        url: https://app.aifordatabase.com/api/v1/docs
+      - type: LLMsTxt
+        url: https://www.aifordatabase.com/llms.txt
+      - type: LLMsTxt
+        url: https://aifordatabase.com/llms-full.txt
+      - type: Documentation
+        url: https://aifordatabase.com/for-agents/
+maintainers:
+  - FN: AI for Database
+    url: https://www.aifordatabase.com
+generated:
+  by: apis.io/add
+  model: claude-opus-4-8
+  confidence: 97
+  at: '2026-08-26T19:07:41.714Z'
