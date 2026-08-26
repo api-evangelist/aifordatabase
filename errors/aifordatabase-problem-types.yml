@@ -1,0 +1,114 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/docs/api-errors-and-retries/
+derived_from: openapi/aifordatabase-openapi.yml
+api: AI for Database API
+format: custom-envelope
+rfc9457: false
+media_type: application/json
+envelope:
+  path_to_error: error
+  fields:
+  - name: code
+    required: true
+    type: string
+    description: Stable machine-readable error code.
+  - name: message
+    required: true
+    type: string
+    description: Human-readable message. For SQL failures the database's own message is passed through verbatim.
+  - name: details
+    required: false
+    type: object
+    description: 'Error-specific payload; for a failed action test it carries error.details.run with the run and its attempts.'
+  correlation: meta.requestId
+status_catalog:
+- status: 400
+  code: VALIDATION_ERROR
+  title: Malformed body or invalid fields
+  remediation: Correct the request; do not retry unchanged.
+  retryable: false
+- status: 401
+  code: UNAUTHORIZED
+  title: Missing, invalid, or expired key
+  remediation: Replace or rotate the API key. Keys start with afd_ and may carry an expiry.
+  retryable: false
+  observed: 'live GET /api/v1/connections without a key returned {"code":"UNAUTHORIZED","message":"Unauthorized"} (2026-08-26)'
+- status: 402
+  code: null
+  title: AI credits exhausted
+  remediation: Use direct SQL (executeQuery) which consumes no credits, or top up the budget. Check getUsageBudget to self-throttle.
+  retryable: false
+  operations: [sendChatMessage]
+- status: 403
+  code: FORBIDDEN
+  title: Missing scope or admin role
+  remediation: Request narrower, explicit authorization; workflow_credentials operations also need an org admin role.
+  retryable: false
+- status: 404
+  code: null
+  title: Resource absent from this organization
+  remediation: Re-discover IDs; do not guess.
+  retryable: false
+- status: 409
+  code: null
+  title: Revision or resource conflict
+  remediation: Re-read current state before editing. For workflows, read draftRevision and resend expectedDraftRevision.
+  retryable: false
+  operations: [updateWorkflow, createWorkflowCredential, deleteWorkflowCredential, createMetric, updateMetric, createSavedQuery, updateSavedQuery]
+- status: 412
+  code: null
+  title: Precondition failed
+  remediation: Satisfy the stated precondition before retrying.
+  retryable: false
+  operations: [autoGenerateAnnotations]
+- status: 422
+  code: null
+  title: Connection, preview, or delivery execution failed
+  remediation: Inspect error.details and the delivery attempts. For SQL errors, fix the SQL.
+  retryable: false
+- status: 428
+  code: null
+  title: Revision or delivery confirmation required
+  remediation: Supply the explicit precondition — expectedDraftRevision for draft edits, confirmDelivery=true for an action test.
+  retryable: false
+  operations: [updateWorkflow, testWorkflowAction]
+- status: 429
+  code: RATE_LIMITED
+  title: Per-organization rate limit reached
+  remediation: Retry with exponential backoff and jitter.
+  retryable: true
+- status: 5xx
+  code: null
+  title: Unexpected or transient service error
+  remediation: Retry idempotent reads with backoff.
+  retryable: conditional
+retry_matrix:
+  safe_to_retry:
+  - GET requests
+  - Schema reads and workflow previews
+  - Direct read-only SQL when duplicate execution is acceptable
+  - 429 and transient 5xx responses after backoff
+  do_not_blindly_retry:
+  - 'POST /api/v1/workflows/{id}/actions/{order}/test'
+  - 'POST /api/v1/workflows/{id}/run'
+  - Webhook test deliveries
+  - Credential rotation
+  - Resource creation when the first response outcome is unknown
+  caveat: These calls may have completed even when the caller did not receive a successful response.
+  source: https://www.aifordatabase.com/docs/api-errors-and-retries/
+outbound_acceptance:
+  note: >-
+    For workflow WEBHOOK actions, 2xx is treated as success by default;
+    successStatusCodes narrows it. The docs give a worked example — for Brevo batch
+    events, [202] makes HTTP 207 a visible failure so partial acceptance is not
+    reported as success.
+coverage:
+  operations_with_4xx: 61
+  operations_total: 80
+  distinct_status_codes: [400, 401, 402, 403, 404, 409, 412, 422, 428, 429]
+gaps:
+- >-
+  The OpenAPI document names only three error codes (VALIDATION_ERROR, RATE_LIMITED,
+  UNAUTHORIZED / FORBIDDEN in prose); there is no published enumeration of the full
+  error.code vocabulary. An agent can branch on status but not on code.

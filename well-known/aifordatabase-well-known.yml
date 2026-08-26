@@ -1,0 +1,68 @@
+generated: '2026-08-26'
+method: probed
+source: live GET of /.well-known/* on every apis.yml + OpenAPI servers[] host
+note: >-
+  Every probed path missed. www.aifordatabase.com answers 404 with the Next.js
+  HTML 404 shell for all /.well-known/* paths; app.aifordatabase.com answers 307
+  and redirects /.well-known/* to the marketing site, which then 404s. No
+  WellKnown or SecurityTxt pointer is emitted, because no path returned a real
+  document — this file records a measured absence, not a served surface.
+hosts:
+- host: www.aifordatabase.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+  - path: /.well-known/mcp.json
+    status: 404
+    file: null
+- host: app.aifordatabase.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 307
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 307
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 307
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 307
+    file: null
+  - path: /.well-known/api-catalog
+    status: 307
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 307
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 307
+    file: null
+  - path: /.well-known/agent.json
+    status: 307
+    file: null
+  - path: /.well-known/mcp.json
+    status: 307
+    file: null

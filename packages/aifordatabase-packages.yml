@@ -1,0 +1,66 @@
+generated: '2026-08-26'
+method: searched
+source: https://registry.npmjs.org/aifordatabase-mcp
+note: >-
+  AI for Database publishes no client SDK. Its own llms.txt states the rule
+  explicitly: "Do not infer an SDK or native MCP server; integrate through
+  REST/OpenAPI unless another official surface is explicitly documented."
+  npm, PyPI, RubyGems, crates.io, NuGet, Maven Central and pkg.go.dev were
+  searched; the only package that exists is the stdio MCP server below, which
+  is NOT a client library — no SDKs pointer is emitted for this provider.
+registries_searched:
+- registry: npm
+  query: aifordatabase
+  results: 1
+- registry: pypi
+  query: aifordatabase
+  results: 0
+  evidence: 'https://pypi.org/pypi/aifordatabase/json -> 404'
+- registry: rubygems
+  query: aifordatabase
+  results: 0
+- registry: crates.io
+  query: aifordatabase
+  results: 0
+- registry: nuget
+  query: aifordatabase
+  results: 0
+- registry: maven-central
+  query: aifordatabase
+  results: 0
+- registry: pkg.go.dev
+  query: aifordatabase
+  results: 0
+packages:
+- name: aifordatabase-mcp
+  registry: npm
+  url: https://www.npmjs.com/package/aifordatabase-mcp
+  kind: mcp-server
+  language: TypeScript
+  official: true
+  version: 0.1.2
+  published: '2026-07-07'
+  first_published: '2026-07-07'
+  license: MIT
+  bin: aifordatabase-mcp
+  repository: https://github.com/dann26parr69/aifordatabase-mcp
+  homepage: https://aifordatabase.com
+  author: Dhrumil Barot
+  npm_maintainer: mira-dhrumil
+  dependencies:
+  - '@modelcontextprotocol/sdk ^1.12.0'
+  official_basis: >-
+    Published from a personal npm account and a personal GitHub account, but the
+    package README books demos at cal.com/dhrumil-barot-xfhmld/aifordatabase-demo
+    — the exact same booking link the aifordatabase.com marketing site uses for
+    its own "Book a demo" CTA — and lists support@aifordatabase.com as the support
+    channel. Same principal, same product, homepage aifordatabase.com. Treated as
+    first-party in substance while noting it is not linked from the company docs.
+  note: >-
+    Direct contradiction worth recording: this package exists and was published
+    2026-07-07, but the company's llms.txt (last_verified 2026-08-04) tells agents
+    there is no native MCP server. Nothing on aifordatabase.com or in its docs
+    references the package. Version 0.1.2 is the only release line; the API it
+    wraps is v1 and materially larger (80 operations vs 9 tools).
+sdks: []
+sdk_count: 0

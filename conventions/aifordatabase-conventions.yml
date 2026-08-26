@@ -1,0 +1,222 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/docs/api-overview/
+sources:
+- https://www.aifordatabase.com/docs/api-overview/
+- https://www.aifordatabase.com/docs/authentication/
+- https://www.aifordatabase.com/docs/api-errors-and-retries/
+- https://aifordatabase.com/api/agents
+- openapi/aifordatabase-openapi.yml
+api: AI for Database API
+base_url: https://app.aifordatabase.com/api/v1
+
+authentication:
+  style: bearer-api-key
+  header: 'Authorization: Bearer afd_...'
+  key_prefix: afd_
+  scoped: true
+  scopes: [query, chat, connections, dashboards, workflows, workflow_credentials, usage, webhooks, admin, '*']
+  extra_role_gate: >-
+    Some operations additionally require an organization admin role regardless of key
+    scope (all workflow_credentials operations).
+  no_test_mode: >-
+    The provider states there are no afdb_live_ / afdb_test_ key variants — one key
+    class only.
+  docs: https://www.aifordatabase.com/docs/authentication/
+  see_also: authentication/aifordatabase-authentication.yml
+
+idempotency:
+  supported: false
+  header: null
+  scope: null
+  retention: null
+  evidence: >-
+    No Idempotency-Key (or equivalent) header appears anywhere in the OpenAPI 3.1
+    document or the docs, and the provider's own retry guidance lists "Resource
+    creation when the first response outcome is unknown" under "do not blindly
+    retry" — an explicit statement that a repeated create is not deduplicated.
+  docs: https://www.aifordatabase.com/docs/api-errors-and-retries/
+  note: >-
+    No Idempotency pointer is emitted in apis.yml. What the API ships instead is
+    optimistic concurrency (below), which prevents lost updates but does not make a
+    retried write safe.
+
+optimistic_concurrency:
+  supported: true
+  mechanism: revision-token-in-body
+  field: expectedDraftRevision
+  read_from: Workflow.draftRevision
+  applies_to: [updateWorkflow]
+  conflict_status: 409
+  precondition_required_status: 428
+  evidence: >-
+    openapi PATCH /workflows/{id} — "Include expectedDraftRevision whenever the draft
+    changes... a stale revision returns HTTP 409"; 428 when the precondition is omitted.
+
+confirmation_preconditions:
+- operation: testWorkflowAction
+  field: confirmDelivery
+  required_value: true
+  status_when_missing: 428
+  why: The call contacts the real external destination.
+- operation: updateWorkflow
+  field: acknowledgedWarnings
+  why: >-
+    Exact warning strings returned by a prior publish attempt must be resubmitted to
+    explicitly confirm publishing.
+
+dry_run_mode:
+  supported: true
+  operations:
+  - operationId: previewWorkflow
+    path: POST /workflows/{id}/preview
+    semantics: >-
+      Executes the draft's query steps only. Never contacts an external system, never
+      creates a delivery, never persists a workflow run.
+  - operationId: testConnection
+    path: POST /connections/{id}/test
+    semantics: Tests connectivity (and introspects on first success) without side effects on data.
+  docs: https://www.aifordatabase.com/docs/agent-workflow-lifecycle/
+
+reversibility:
+  grade: documented
+  basis: >-
+    Every write surface has a named reversal operation in the contract, but the docs
+    state no time window for any of them — no restore-within-N-days, no undo window,
+    no soft-delete retention period is published anywhere. Graded `documented`, not
+    `verified`, for exactly that reason.
+  surfaces:
+  - write: createWorkflow / updateWorkflow (publish, isActive=true)
+    reversal: updateWorkflow with isActive=false
+    operationId: updateWorkflow
+    window: null
+    window_source: null
+    note: >-
+      Pausing stops future scheduled runs. Publishing creates an immutable production
+      version; pausing does not un-run anything already delivered.
+  - write: createWorkflow
+    reversal: deleteWorkflow
+    operationId: deleteWorkflow
+    window: null
+    window_source: null
+  - write: createConnection
+    reversal: deleteConnection
+    operationId: deleteConnection
+    window: null
+    window_source: null
+    note: No restore operation exists in the contract.
+  - write: createApiKey
+    reversal: revokeApiKey
+    operationId: revokeApiKey
+    window: null
+    window_source: null
+    note: >-
+      Documented as a security best practice — "revoke unused keys (DELETE
+      /api/v1/keys/:id)" — https://www.aifordatabase.com/docs/authentication/
+  - write: createWorkflowCredential
+    reversal: rotateWorkflowCredential / deleteWorkflowCredential
+    operationId: rotateWorkflowCredential
+    window: null
+    window_source: null
+    note: Both require the workflow_credentials scope AND an org admin role.
+  - write: submitQueryForApproval
+    reversal: rejectQuery
+    operationId: rejectQuery
+    window: null
+    window_source: null
+    note: A pending query can be rejected before execution; there is no unapprove.
+  - write: createWebhookEndpoint
+    reversal: deleteWebhookEndpoint / updateWebhookEndpoint (isActive=false)
+    operationId: deleteWebhookEndpoint
+    window: null
+    window_source: null
+  - write: createDashboard / createWidget / createMetric / createSavedQuery / createAnnotation / createConversation / createApprovalRule
+    reversal: the matching delete* operation
+    operationId: deleteDashboard
+    window: null
+    window_source: null
+  irreversible:
+  - operations: [triggerWorkflow, testWorkflowAction]
+    why: >-
+      Both perform real external delivery (email / webhook / Slack). The provider says
+      so plainly: "Manual workflow runs have real side effects" and "Action tests
+      require confirmDelivery=true because they contact the destination." Nothing in
+      the API can recall a delivered message.
+    source: https://www.aifordatabase.com/docs/api-errors-and-retries/
+  - operations: [executeQuery, executeSavedQuery]
+    why: >-
+      SQL is executed against the caller's own database. Connections are read-only by
+      default, but the API does not itself provide a rollback.
+
+pagination:
+  style: page-number
+  request_params: [page, pageSize]
+  defaults:
+    page: 1
+    pageSize: 20
+  response_location: meta.pagination
+  response_fields: [total, page, pageSize, totalPages]
+  termination_rule: 'Continue until page >= totalPages. Cursor pagination is explicitly not used.'
+  docs: https://www.aifordatabase.com/docs/api-errors-and-retries/
+
+envelope:
+  shape: '{ data, error, meta }'
+  mutually_exclusive: 'data and error are mutually exclusive'
+  success_example: '{"data": {...}, "error": null, "meta": {"requestId": "...", "timestamp": "..."}}'
+  error_example: '{"data": null, "error": {"code": "VALIDATION_ERROR", "message": "name is required", "details": {}}, "meta": {...}}'
+  error_fields: [code, message, details]
+  rfc9457: false
+  note: >-
+    A stable custom envelope, not application/problem+json. Every response —
+    success and failure — carries the same three top-level keys.
+
+request_tracing:
+  field: meta.requestId
+  format: uuid
+  header: null
+  guidance: >-
+    "Preserve meta.requestId in logs and support requests so a failed call can be
+    traced." The id is in the body only; no X-Request-Id response header is documented
+    or was observed on a live 401.
+
+versioning:
+  style: url-path-prefix
+  current: v1
+  policy: >-
+    "We guarantee backward compatibility within a major version. Breaking changes will
+    be released under a new version prefix with a migration guide."
+  docs: https://www.aifordatabase.com/docs/api-overview/
+  see_also: lifecycle/aifordatabase-lifecycle.yml
+
+rate_limit_signaling:
+  status_on_exhaustion: 429
+  error_code: RATE_LIMITED
+  response_headers_documented: []
+  response_headers_observed: []
+  observation: >-
+    A live unauthenticated GET https://app.aifordatabase.com/api/v1/connections
+    (HTTP 401, 2026-08-26) returned no X-RateLimit-*, RateLimit-* or Retry-After
+    headers. The published limits are numbers in the docs only; an agent cannot read
+    remaining budget from a response.
+  see_also: rate-limits/aifordatabase-rate-limits.yml
+
+field_expansion:
+  supported: false
+  note: No expand / fields / sparse-fieldset parameters appear in the contract.
+
+metadata:
+  user_defined_metadata: false
+  note: >-
+    No generic metadata bag on resources. Schema context is carried instead by
+    connection annotations (listAnnotations / createAnnotation / autoGenerateAnnotations).
+
+streaming:
+  supported: true
+  operation: sendChatMessage
+  note: 'POST /chat declares a "200 (stream)" response alongside the JSON 200.'
+
+cross_links:
+  errors: errors/aifordatabase-problem-types.yml
+  lifecycle: lifecycle/aifordatabase-lifecycle.yml
+  authentication: authentication/aifordatabase-authentication.yml
+  rate_limits: rate-limits/aifordatabase-rate-limits.yml

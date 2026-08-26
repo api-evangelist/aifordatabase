@@ -1,0 +1,100 @@
+generated: '2026-08-26'
+method: searched
+source: https://app.aifordatabase.com/api/v1/openapi.json
+sources:
+- openapi/aifordatabase-openapi.yml
+- https://www.aifordatabase.com/docs/api-errors-and-retries/
+- https://aifordatabase.com/api/agents
+api: AI for Database API
+asyncapi_published: false
+asyncapi_probes:
+- url: https://app.aifordatabase.com/api/v1/asyncapi.json
+  status: not served
+- url: https://www.aifordatabase.com/asyncapi.yaml
+  status: not served
+note: >-
+  No AsyncAPI document exists. The provider does ship a real, managed inbound-webhook
+  surface with its own CRUD, a signing secret, a delivery log and a test send, so this
+  file captures that event surface as a Webhooks catalog rather than fabricating an
+  AsyncAPI spec.
+
+webhooks:
+  direction: outbound-from-provider
+  scope_required: webhooks
+  signed: true
+  signing:
+    secret_field: WebhookEndpoint.secret
+    disclosure: 'Full secret shown only on creation; masked on subsequent reads.'
+    algorithm_published: false
+    header_published: false
+    gap: >-
+      The provider calls these "signed event webhooks" (llms.txt, /api/agents
+      capabilities list) and issues a per-endpoint secret, but neither the signature
+      header name nor the signing algorithm is documented anywhere public. A consumer
+      cannot implement verification from the published material.
+  subscription:
+    field: events
+    type: array of string
+    wildcard: "['*'] subscribes to all events"
+    enumerated: false
+    gap: >-
+      The OpenAPI declares events as an unconstrained array of strings with no enum and
+      no named event types, and no event reference page exists on the docs site. The
+      event vocabulary is therefore not machine-readable and not discoverable — the
+      single largest gap in this provider's event surface.
+  management_operations:
+  - operationId: listWebhookEndpoints
+    method: GET
+    path: /webhooks
+  - operationId: createWebhookEndpoint
+    method: POST
+    path: /webhooks
+  - operationId: getWebhookEndpoint
+    method: GET
+    path: /webhooks/{id}
+  - operationId: updateWebhookEndpoint
+    method: PATCH
+    path: /webhooks/{id}
+  - operationId: deleteWebhookEndpoint
+    method: DELETE
+    path: /webhooks/{id}
+  - operationId: listWebhookDeliveries
+    method: GET
+    path: /webhooks/{id}/deliveries
+    note: 'Delivery log: event, payload, statusCode, attempts, deliveredAt, createdAt.'
+  - operationId: testWebhookEndpoint
+    method: POST
+    path: /webhooks/{id}/test
+    note: Sends a real test event to the endpoint.
+  delivery_record:
+    schema: WebhookDelivery
+    fields: [id, endpointId, event, payload, statusCode, attempts, deliveredAt, createdAt]
+    retry_policy_published: false
+  plan_gate: 'Webhook integrations require the Pro plan or above (https://www.aifordatabase.com/pricing/).'
+
+outbound_workflow_actions:
+  direction: provider-calls-your-endpoint
+  note: >-
+    A second, distinct event-style surface: workflow WEBHOOK actions post to a
+    destination you choose (Slack incoming webhooks, any HTTPS endpoint) when a
+    scheduled query condition fires.
+  schema: WebhookActionConfig
+  config_version: 2
+  destination_rules:
+  - 'Public HTTPS destination on port 443 only; private and reserved networks are rejected.'
+  - 'Secret headers cannot be supplied inline — they must come from an encrypted, destination-bound workflow credential (credentialId).'
+  - 'Max 20 headers.'
+  methods: [GET, POST, PUT, PATCH, DELETE]
+  body_modes: [NONE, JSON, RAW, FORM_URLENCODED]
+  templating: 'bodyTemplate supports workflow/query variables.'
+  acceptance:
+    default: any 2xx is success
+    override_field: successStatusCodes
+    worked_example: 'For Brevo batch events, [202] treats HTTP 207 as a visible failure so partial acceptance is not reported as success.'
+    source: https://www.aifordatabase.com/docs/api-errors-and-retries/
+  action_types: [EMAIL, WEBHOOK]
+  max_actions_per_workflow: 10
+
+streaming:
+  operation: sendChatMessage
+  note: 'POST /chat declares a "200 (stream)" response variant alongside the JSON 200. No transport (SSE / chunked) is named in the contract.'

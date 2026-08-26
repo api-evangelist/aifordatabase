@@ -1,0 +1,51 @@
+generated: '2026-08-26'
+method: searched
+probe: true
+source: https://www.aifordatabase.com/trust/
+url: https://www.aifordatabase.com/trust/
+certifications:
+- SOC 2
+- GDPR
+evidence:
+- source: https://www.aifordatabase.com/trust/
+  keywords:
+  - soc 2
+  - trust center
+  - compliance certification
+  - gdpr
+certifications_held: []
+claim_status:
+- claim: SOC 2 Type II
+  held: false
+  published_wording: '"designed to meet SOC 2 Type II standards... Formal certification is available for
+    enterprise clients."'
+- claim: GDPR
+  held: false
+  published_wording: '"GDPR ready" / "Designed For"'
+- claim: HIPAA
+  held: false
+  published_wording: '"Enterprise Available"'
+- claim: ISO 27001
+  held: false
+  published_wording: '"Aligned"'
+note: The certifications[] list above records the badges the trust and security pages display. None of
+  them is asserted as an achieved, audited certification — every badge on this provider's site is qualified
+  ("designed to meet", "aligned", "available", "ready"). A TrustCenter pointer is wired in apis.yml because
+  the trust page genuinely exists; a Compliance pointer is deliberately NOT wired, because no published
+  compliance certification backs it. See conformance/aifordatabase-conformance.yml.
+pages:
+- url: https://www.aifordatabase.com/trust/
+  status: 200
+- url: https://www.aifordatabase.com/security/
+  status: 200
+controls_published:
+- AES-256 encryption at rest
+- TLS 1.3 in transit
+- per-tenant credential encryption keys
+- read-only database connections by default
+- role-based access control
+- SAML 2.0 / OIDC SSO (Enterprise)
+- MFA
+- audit logging with user, timestamp and IP, exportable to SIEM
+- self-hosted deployment option
+- key rotation

@@ -1,0 +1,41 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/playground/
+api: AI for Database API
+kind: sample-dataset
+name: Playground (sample data)
+access: 'Free account required — sign up, then choose "Try with sample data first". No credit card, no database credentials.'
+signup: https://app.aifordatabase.com/signup
+description: >-
+  A hosted sample database you can query, dashboard and alert on exactly as you would
+  your own connection, so an integration can be exercised end to end before pointing
+  it at production data.
+dataset:
+  tables: 6
+  table_names: [accounts, users, subscriptions, payments, product_events, support_tickets]
+  rows: '40,000+'
+  properties: [joins, foreign keys]
+  seeded_findings:
+  - a failed-payment spike in the last three weeks
+  - about a dozen accounts whose usage quietly dried up
+  - a refund cluster denting last month's revenue
+test_credentials:
+  published: false
+  note: >-
+    No public test keys, no test-mode key prefix, no test cards. The provider states
+    in its own llms-full.txt that there are no afdb_live_ / afdb_test_ key variants —
+    one key class only, so there is no separate sandbox credential to record.
+non_destructive_api_surfaces:
+- operationId: previewWorkflow
+  note: Runs draft queries only; never contacts an external system or persists a run.
+- operationId: testConnection
+  note: Tests connectivity and introspects the schema.
+- operationId: testWorkflowEndpoint
+  note: 'POST /webhooks/{id}/test sends a test event to a webhook endpoint (real delivery).'
+demo:
+  booking: https://www.aifordatabase.com/demo/
+  note: 15-minute walkthrough with the founder.
+gaps:
+- >-
+  The playground sits behind account signup, so an agent cannot exercise the API
+  anonymously. There is no unauthenticated sandbox host and no published test key.

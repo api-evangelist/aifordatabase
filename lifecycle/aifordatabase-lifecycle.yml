@@ -1,0 +1,61 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/docs/api-overview/
+api: AI for Database API
+versioning:
+  scheme: url-path-prefix
+  current_version: v1
+  base_url: https://app.aifordatabase.com/api/v1
+  compatibility_promise: 'Backward compatibility is guaranteed within a major version.'
+  breaking_change_policy: 'Breaking changes will be released under a new version prefix with a migration guide.'
+  spec_version: '1.0.0'
+  source: https://www.aifordatabase.com/docs/api-overview/
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  note: >-
+    No deprecation policy page, no Sunset or Deprecation response headers documented,
+    and no operation in the OpenAPI 3.1 document carries deprecated: true. The
+    versioning promise above is the only forward-compatibility statement published.
+    No Deprecation pointer is emitted.
+status_page:
+  published: false
+  probes:
+  - url: https://status.aifordatabase.com/
+    status: '<no response> (DNS did not resolve)'
+  - url: https://www.aifordatabase.com/status/
+    status: 404
+  note: >-
+    No status page exists on either the conventional subdomain or a site path, and the
+    sitemap lists none. No StatusPage pointer is emitted.
+sla:
+  published: false
+  note: >-
+    No SLA or uptime commitment is published. The pricing page offers "Priority support"
+    on Pro and "Dedicated support" on Enterprise, which are support tiers, not an SLA.
+changelog:
+  published: false
+  probes:
+  - url: https://www.aifordatabase.com/changelog/
+    status: 404
+  - url: https://www.aifordatabase.com/docs/changelog/
+    status: 404
+  note: >-
+    No dated API changelog. The nearest thing the provider publishes is the
+    last_verified date carried by its own agent surfaces (llms.txt and
+    /api/agents both state 2026-08-04). No ChangeLog pointer is emitted.
+roadmap:
+  published: false
+  probes:
+  - url: https://www.aifordatabase.com/roadmap/
+    status: 404
+immutability_semantics:
+  note: >-
+    Worth recording as a lifecycle property of the product itself: publishing a
+    workflow (PATCH /workflows/{id} with isActive=true) atomically creates an
+    immutable production version, and scheduled runs always execute that published
+    version rather than the live draft. Drafts carry a monotonically increasing
+    draftRevision.

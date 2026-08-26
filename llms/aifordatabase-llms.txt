@@ -1,0 +1,62 @@
+# AI for Database
+
+> Ask questions, build dashboards, and automate actions from live operational databases. The public REST API is designed for applications and AI agents.
+
+## Canonical agent resources
+
+- Human agent overview: https://aifordatabase.com/agents/
+- Machine-readable reference: https://aifordatabase.com/for-agents/
+- JSON capability manifest: https://aifordatabase.com/api/agents
+- OpenAPI 3.1 contract: https://app.aifordatabase.com/api/v1/openapi.json
+- Interactive API reference: https://app.aifordatabase.com/api/v1/docs
+- Full AI-readable reference: https://aifordatabase.com/llms-full.txt
+
+## Authentication
+
+- Base URL: https://app.aifordatabase.com/api/v1
+- Header: Authorization: Bearer afd_...
+- Keys are scoped. Outbound workflow credentials are separate, encrypted, write-only secrets.
+
+## Verified API capabilities
+
+- sanitized_connection_discovery
+- schema_introspection
+- natural_language_query
+- raw_sql_results
+- dashboards_and_widgets
+- saved_queries_and_metrics
+- query_approval
+- paused_workflow_drafts
+- query_only_workflow_preview
+- encrypted_destination_bound_credentials
+- explicit_live_action_testing
+- immutable_workflow_publishing
+- workflow_run_inspection
+- signed_event_webhooks
+
+## Recommended implementation guides
+
+- API overview: https://aifordatabase.com/docs/api-overview/
+- Authentication and scopes: https://aifordatabase.com/docs/authentication/
+- Endpoint catalog: https://aifordatabase.com/docs/endpoints/
+- Query databases from an agent: https://aifordatabase.com/docs/agent-querying-databases/
+- Safe workflow lifecycle: https://aifordatabase.com/docs/agent-workflow-lifecycle/
+- Outbound credentials: https://aifordatabase.com/docs/outbound-credentials/
+- Errors and retries: https://aifordatabase.com/docs/api-errors-and-retries/
+- End-to-end scheduled alert: https://aifordatabase.com/docs/agent-created-alerts/
+
+## Product pages
+
+- Ask a database: https://aifordatabase.com/solutions/ask-your-database/
+- Dashboards and reports: https://aifordatabase.com/solutions/dashboards-and-reports/
+- Database workflows: https://aifordatabase.com/solutions/database-workflows/
+- Alerts and monitoring: https://aifordatabase.com/solutions/alerts-and-monitoring/
+- Integrations: https://aifordatabase.com/integrations/
+- Pricing: https://aifordatabase.com/pricing/
+- Security: https://aifordatabase.com/security/
+
+## Contract rule
+
+The OpenAPI document is authoritative for endpoint methods, paths, request bodies, and response schemas. Do not infer an SDK or native MCP server; integrate through REST/OpenAPI unless another official surface is explicitly documented.
+
+Last verified: 2026-08-04

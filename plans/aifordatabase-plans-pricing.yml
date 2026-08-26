@@ -1,0 +1,79 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/pricing/
+api: AI for Database API
+currency: USD
+billing_period: month
+plan_count: 3
+plans:
+- name: Free
+  price: 0
+  currency: USD
+  period: forever
+  included:
+  - Free and open-source AI models
+  - Natural language queries
+  - Dashboard generation
+  - Team invites with role-based access
+  - Audit logs
+  limits:
+    workflows: 3
+    api_requests_per_minute: 60
+    chat_requests_per_minute: 20
+    webhook_integrations: false
+    per_user_usage_tracking: false
+  credit_card_required: false
+- name: Pro
+  price: 19
+  currency: USD
+  period: month
+  included:
+  - Everything in Free
+  - 'All premium models: GPT-4o, Gemini, Claude'
+  - Unlimited workflows
+  - Webhook integrations
+  - Team management with per-user usage tracking
+  - Priority support
+  limits:
+    workflows: unlimited
+    api_requests_per_minute: 300
+    chat_requests_per_minute: 100
+  contract: 'No contract; monthly subscription, cancel anytime.'
+  on_cancel: 'Access continues to end of billing period, then the account reverts to Free.'
+- name: Enterprise
+  price: null
+  price_note: Custom — contact sales
+  currency: USD
+  period: null
+  included:
+  - Everything in Pro
+  - Self-hosted deployment
+  - Unlimited connections
+  - SSO & advanced security (SAML 2.0 / OIDC)
+  - Dedicated support
+  - Bring your own models and API keys
+  limits:
+    workflows: unlimited
+    api_requests_per_minute: 1000
+    chat_requests_per_minute: 500
+    database_connections: unlimited
+  contact: https://www.aifordatabase.com/contact/
+seats:
+  per_seat_fees: false
+  note: 'Team features are on every plan at no extra cost; billing is at the organization level.'
+usage_metering:
+  model: AI credits
+  applies_to: [sendChatMessage]
+  read_endpoint: 'GET /api/v1/usage/budget'
+  exhaustion_status: 402
+  note: 'Direct SQL (POST /connections/{id}/query) consumes no AI credits.'
+payment_methods:
+- all major credit cards
+- PayPal
+- wire transfer (Enterprise)
+api_access:
+  gated_behind_plan: false
+  note: >-
+    The REST API and its OpenAPI contract are not listed as a paid add-on; webhook
+    integrations are the one API-adjacent capability the pricing page restricts to
+    Pro and above.

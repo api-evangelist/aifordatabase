@@ -1,14 +1,44 @@
 name: AI for Database
-description: >-
-  AI-powered database platform offering natural-language querying (text-to-SQL), dashboards, reports, and scheduled
-  database workflows with query approval. Exposes a scoped Bearer-auth REST API with a public OpenAPI 3.1 contract, plus
-  agent-native discovery surfaces (llms.txt, llms-full.txt, and a JSON capability manifest). Supports PostgreSQL, MySQL,
-  MongoDB, SQL Server, and Google Sheets.
+aid: aifordatabase
+description: 'AI for Database is a natural-language data layer for operational databases, built by Wavicle.tech. It connects
+  read-only to PostgreSQL, MySQL, MariaDB, SQL Server, MongoDB, SQLite and Google Sheets, translates plain-English questions
+  into SQL, returns the SQL alongside the answer, pins results as self-refreshing dashboards, and runs scheduled workflows
+  that fire email, webhook or Slack alerts when a query condition becomes true. The public REST API is explicitly designed
+  for AI agents: a scoped Bearer-auth contract (afd_ keys, nine permission scopes) documented by a live OpenAPI 3.1 spec
+  with 80 operations, a paused-draft workflow lifecycle with a real dry-run preview and a confirmation-gated live action
+  test, human query approval, and agent-native discovery surfaces at llms.txt, llms-full.txt and a JSON capability manifest.'
+image: https://www.aifordatabase.com/logo.png
 url: https://raw.githubusercontent.com/api-evangelist/ai-for-database/refs/heads/main/apis.yml
 created: '2026-08-26'
 modified: '2026-08-26'
 specificationVersion: '0.21'
 tags:
+- AI
+- Database
+- Analytics
+- Developer Tools
+- Natural Language Query
+- Text-to-SQL
+- Dashboards
+- Business Intelligence
+- Workflow Automation
+- Alerts
+- Agent-Native
+- LLMSTxt
+- OpenAPI
+- Webhooks
+- MCP
+- PostgreSQL
+- MySQL
+- MongoDB
+apis:
+- name: AI for Database API
+  description: Scoped Bearer-auth REST API for natural-language queries, chat, connections, dashboards, workflows, webhooks,
+    metrics, saved queries, query approval, usage, and API key management. Documented via a public OpenAPI 3.1 spec and
+    interactive reference.
+  humanURL: https://aifordatabase.com/docs/api-overview/
+  baseURL: https://app.aifordatabase.com/api/v1
+  tags:
   - AI
   - Database
   - Analytics
@@ -22,46 +52,120 @@ tags:
   - LLMSTxt
   - OpenAPI
   - Webhooks
-apis:
-  - name: AI for Database API
-    description: >-
-      Scoped Bearer-auth REST API for natural-language queries, chat, connections, dashboards, workflows, webhooks,
-      metrics, saved queries, query approval, usage, and API key management. Documented via a public OpenAPI 3.1 spec
-      and interactive reference.
-    humanURL: https://aifordatabase.com/docs/api-overview/
-    baseURL: https://app.aifordatabase.com/api/v1
-    tags:
-      - AI
-      - Database
-      - Analytics
-      - Developer Tools
-      - Natural Language Query
-      - Text-to-SQL
-      - Dashboards
-      - BI
-      - Workflow Automation
-      - Agent-Native
-      - LLMSTxt
-      - OpenAPI
-      - Webhooks
-    properties:
-      - type: OpenAPI
-        url: https://app.aifordatabase.com/api/v1/openapi.json
-      - type: Documentation
-        url: https://aifordatabase.com/docs/api-overview/
-      - type: Documentation
-        url: https://app.aifordatabase.com/api/v1/docs
-      - type: LLMsTxt
-        url: https://www.aifordatabase.com/llms.txt
-      - type: LLMsTxt
-        url: https://aifordatabase.com/llms-full.txt
-      - type: Documentation
-        url: https://aifordatabase.com/for-agents/
+  properties:
+  - type: OpenAPI
+    url: https://app.aifordatabase.com/api/v1/openapi.json
+  - type: Documentation
+    url: https://aifordatabase.com/docs/api-overview/
+  - type: Documentation
+    url: https://app.aifordatabase.com/api/v1/docs
+  - type: LLMsTxt
+    url: https://www.aifordatabase.com/llms.txt
+  - type: LLMsTxt
+    url: https://aifordatabase.com/llms-full.txt
+  - type: Documentation
+    url: https://aifordatabase.com/for-agents/
+  - type: Documentation
+    url: https://aifordatabase.com/api/agents
+    description: JSON agent capability manifest (schema_version, canonical_contract, last_verified). Verified 2026-08-26.
+  - type: OpenAPI
+    url: openapi/aifordatabase-openapi.yml
+    description: Verbatim capture of the provider OpenAPI 3.1 (46 paths, 80 operations). Fetched 2026-08-26, HTTP 200.
+  - type: APIReference
+    url: https://app.aifordatabase.com/api/v1/docs
+    description: Scalar-rendered interactive reference served by the app from its own openapi.json. Verified 200, 2026-08-26.
+  - type: Overlay
+    url: overlays/aifordatabase-openapi-overlay.yaml
+  - type: DataModel
+    url: data-model/aifordatabase-data-model.yml
+  - type: ErrorCatalog
+    url: errors/aifordatabase-problem-types.yml
+  - type: Conventions
+    url: conventions/aifordatabase-conventions.yml
+  - type: Authentication
+    url: authentication/aifordatabase-authentication.yml
+  - type: RateLimits
+    url: rate-limits/aifordatabase-rate-limits.yml
+  - type: Lifecycle
+    url: lifecycle/aifordatabase-lifecycle.yml
+  - type: Conformance
+    url: conformance/aifordatabase-conformance.yml
+  - type: Webhooks
+    url: asyncapi/aifordatabase-webhooks.yml
+    description: Managed signed-webhook surface (endpoints, deliveries, test send) plus outbound workflow webhook actions.
+      No AsyncAPI document is published.
+  - type: MCPServer
+    url: mcp/aifordatabase-mcp.yml
+    description: Local-stdio MCP server (npm aifordatabase-mcp@0.1.2, 9 tools). No hosted/remote endpoint.
+  - type: ToolCrosswalk
+    url: mcp/aifordatabase-tool-crosswalk.yml
+  - type: LLMsTxt
+    url: llms/aifordatabase-llms.txt
+    description: Verbatim capture of https://www.aifordatabase.com/llms.txt, fetched 2026-08-26, HTTP 200.
+common:
+- type: DeveloperPortal
+  url: https://www.aifordatabase.com/for-agents/
+  description: Machine-readable agent reference page. Verified 200, 2026-08-26.
+- type: Documentation
+  url: https://www.aifordatabase.com/docs/
+  description: Verified 200, 2026-08-26.
+- type: APIReference
+  url: https://www.aifordatabase.com/docs/endpoints/
+  description: Human endpoint catalog. Verified 200, 2026-08-26.
+- type: GettingStarted
+  url: https://www.aifordatabase.com/docs/quickstart/
+  description: Verified 200, 2026-08-26.
+- type: Support
+  url: https://www.aifordatabase.com/contact/
+  description: Verified 200, 2026-08-26.
+- type: Blog
+  url: https://www.aifordatabase.com/blog/
+  description: Verified 200, 2026-08-26.
+- type: Pricing
+  url: https://www.aifordatabase.com/pricing/
+  description: Verified 200, 2026-08-26.
+- type: SignUp
+  url: https://app.aifordatabase.com/signup
+  description: Verified 200, 2026-08-26.
+- type: Login
+  url: https://app.aifordatabase.com/login
+  description: Verified 200, 2026-08-26.
+- type: TermsOfService
+  url: https://www.aifordatabase.com/terms/
+  description: Verified 200, 2026-08-26.
+- type: PrivacyPolicy
+  url: https://www.aifordatabase.com/privacy/
+  description: Verified 200, 2026-08-26.
+- type: TrustCenter
+  url: https://www.aifordatabase.com/trust/
+  description: Trust Center page. Verified 200, 2026-08-26. Captured with claim qualifications in security/aifordatabase-trust-center.yml
+    — no certification is asserted as held.
+- type: Plans
+  url: plans/aifordatabase-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/aifordatabase-rate-limits.yml
+- type: Sandbox
+  url: sandbox/aifordatabase-sandbox.yml
+  description: Sample-dataset playground (6 tables, 40,000+ rows) behind free signup.
+- type: Packages
+  url: packages/aifordatabase-packages.yml
+  description: No client SDK exists in any registry; the only package is the stdio MCP server.
+- type: AgentSkill
+  url: skills/_index.yml
+  description: Four generated Agent Skills, every operationId verified against the provider OpenAPI.
+- type: DomainSecurity
+  url: security/aifordatabase-domain-security.yml
 maintainers:
-  - FN: AI for Database
-    url: https://www.aifordatabase.com
+- FN: AI for Database
+  email: hello@aifordatabase.com
+  url: https://www.aifordatabase.com
 generated:
   by: apis.io/add
   model: claude-opus-4-8
   confidence: 97
   at: '2026-08-26T19:07:41.714Z'
+x-enrichment:
+  date: '2026-08-26'
+  status: enriched
+  artifacts_added: 19
+  pass: local-v1

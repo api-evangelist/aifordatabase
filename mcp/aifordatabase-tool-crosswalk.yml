@@ -1,0 +1,374 @@
+generated: '2026-08-26'
+method: derived
+source: openapi/aifordatabase-openapi.yml + mcp/aifordatabase-mcp.yml (tool map read from npm tarball
+  aifordatabase-mcp-0.1.2)
+note: Every MCP tool was read verbatim from the published package source, and every REST operationId below
+  exists in the provider's own OpenAPI 3.1 document, so the bindings are asserted at high confidence rather
+  than matched by name. There is no GraphQL surface.
+surfaces:
+  openapi:
+    url: https://app.aifordatabase.com/api/v1/openapi.json
+    file: openapi/aifordatabase-openapi.yml
+    operations: 80
+    gated: false
+  graphql: null
+  mcp:
+    mode: local-stdio
+    package: https://www.npmjs.com/package/aifordatabase-mcp
+    endpoint: null
+    gated: requires an afd_ API key at runtime; the tool list itself is public in the package source
+crosswalk:
+- tool: list_connections
+  category: Connections
+  rest:
+  - listConnections
+  binding: '1:1'
+  confidence: high
+- tool: get_schema
+  category: Connections
+  rest:
+  - getConnectionSchema
+  binding: '1:1'
+  confidence: high
+  note: Reads the cached schema only; the MCP tool does not expose the POST re-introspection operation
+    (introspectConnectionSchema).
+- tool: run_query
+  category: Connections / Query
+  rest:
+  - executeQuery
+  binding: '1:1'
+  confidence: high
+  note: Tool caps returned rows at 500; the REST operation is the same endpoint.
+- tool: ask
+  category: Chat
+  rest:
+  - sendChatMessage
+  binding: '1:1'
+  confidence: high
+  note: Tool passes an optional conversationId through to the same operation.
+- tool: list_workflows
+  category: Workflows
+  rest:
+  - listWorkflows
+  binding: '1:1'
+  confidence: high
+- tool: create_workflow
+  category: Workflows
+  rest:
+  - createWorkflow
+  binding: '1:1'
+  confidence: high
+  note: Tool exposes a reduced input schema (name, description, connectionId, triggerType, triggerConfig,
+    steps, actions) against the fuller WorkflowCreate schema.
+- tool: run_workflow
+  category: Workflows
+  rest:
+  - triggerWorkflow
+  binding: '1:1'
+  confidence: high
+  note: 'Real side effects: this fires the workflow''s EMAIL/WEBHOOK actions.'
+- tool: list_dashboards
+  category: Dashboards
+  rest:
+  - listDashboards
+  binding: '1:1'
+  confidence: high
+- tool: get_usage
+  category: Usage
+  rest:
+  - getUsageBudget
+  binding: '1:1'
+  confidence: high
+mcp_only: []
+rest_only:
+- operationId: createConnection
+  method: POST
+  path: /connections
+  tag: Connections
+- operationId: deleteConnection
+  method: DELETE
+  path: /connections/{id}
+  tag: Connections
+- operationId: getConnection
+  method: GET
+  path: /connections/{id}
+  tag: Connections
+- operationId: updateConnection
+  method: PATCH
+  path: /connections/{id}
+  tag: Connections
+- operationId: listAnnotations
+  method: GET
+  path: /connections/{id}/annotations
+  tag: Connections
+- operationId: createAnnotation
+  method: POST
+  path: /connections/{id}/annotations
+  tag: Connections
+- operationId: autoGenerateAnnotations
+  method: POST
+  path: /connections/{id}/annotations/auto
+  tag: Connections
+- operationId: deleteAnnotation
+  method: DELETE
+  path: /connections/{id}/annotations/{annotationId}
+  tag: Connections
+- operationId: getAnnotation
+  method: GET
+  path: /connections/{id}/annotations/{annotationId}
+  tag: Connections
+- operationId: updateAnnotation
+  method: PATCH
+  path: /connections/{id}/annotations/{annotationId}
+  tag: Connections
+- operationId: introspectConnectionSchema
+  method: POST
+  path: /connections/{id}/schema
+  tag: Connections
+- operationId: testConnection
+  method: POST
+  path: /connections/{id}/test
+  tag: Connections
+- operationId: listConversations
+  method: GET
+  path: /conversations
+  tag: Conversations
+- operationId: createConversation
+  method: POST
+  path: /conversations
+  tag: Conversations
+- operationId: deleteConversation
+  method: DELETE
+  path: /conversations/{id}
+  tag: Conversations
+- operationId: getConversation
+  method: GET
+  path: /conversations/{id}
+  tag: Conversations
+- operationId: updateConversation
+  method: PATCH
+  path: /conversations/{id}
+  tag: Conversations
+- operationId: listConversationMessages
+  method: GET
+  path: /conversations/{id}/messages
+  tag: Conversations
+- operationId: createDashboard
+  method: POST
+  path: /dashboards
+  tag: Dashboards
+- operationId: deleteDashboard
+  method: DELETE
+  path: /dashboards/{id}
+  tag: Dashboards
+- operationId: getDashboard
+  method: GET
+  path: /dashboards/{id}
+  tag: Dashboards
+- operationId: updateDashboard
+  method: PATCH
+  path: /dashboards/{id}
+  tag: Dashboards
+- operationId: listWidgets
+  method: GET
+  path: /dashboards/{id}/widgets
+  tag: Dashboards
+- operationId: createWidget
+  method: POST
+  path: /dashboards/{id}/widgets
+  tag: Dashboards
+- operationId: deleteWidget
+  method: DELETE
+  path: /dashboards/{id}/widgets/{widgetId}
+  tag: Dashboards
+- operationId: updateWidget
+  method: PATCH
+  path: /dashboards/{id}/widgets/{widgetId}
+  tag: Dashboards
+- operationId: getWidgetData
+  method: GET
+  path: /dashboards/{id}/widgets/{widgetId}/data
+  tag: Dashboards
+- operationId: listApiKeys
+  method: GET
+  path: /keys
+  tag: Keys
+- operationId: createApiKey
+  method: POST
+  path: /keys
+  tag: Keys
+- operationId: revokeApiKey
+  method: DELETE
+  path: /keys/{id}
+  tag: Keys
+- operationId: listMetrics
+  method: GET
+  path: /metrics
+  tag: Metrics
+- operationId: createMetric
+  method: POST
+  path: /metrics
+  tag: Metrics
+- operationId: deleteMetric
+  method: DELETE
+  path: /metrics/{id}
+  tag: Metrics
+- operationId: getMetric
+  method: GET
+  path: /metrics/{id}
+  tag: Metrics
+- operationId: updateMetric
+  method: PATCH
+  path: /metrics/{id}
+  tag: Metrics
+- operationId: getMetricValue
+  method: GET
+  path: /metrics/{id}/value
+  tag: Metrics
+- operationId: listApprovalRules
+  method: GET
+  path: /approval-rules
+  tag: Query Approval
+- operationId: createApprovalRule
+  method: POST
+  path: /approval-rules
+  tag: Query Approval
+- operationId: deleteApprovalRule
+  method: DELETE
+  path: /approval-rules/{id}
+  tag: Query Approval
+- operationId: getApprovalRule
+  method: GET
+  path: /approval-rules/{id}
+  tag: Query Approval
+- operationId: updateApprovalRule
+  method: PATCH
+  path: /approval-rules/{id}
+  tag: Query Approval
+- operationId: listPendingQueries
+  method: GET
+  path: /queries/pending
+  tag: Query Approval
+- operationId: submitQueryForApproval
+  method: POST
+  path: /queries/submit
+  tag: Query Approval
+- operationId: approveQuery
+  method: POST
+  path: /queries/{id}/approve
+  tag: Query Approval
+- operationId: rejectQuery
+  method: POST
+  path: /queries/{id}/reject
+  tag: Query Approval
+- operationId: getQueryApprovalStatus
+  method: GET
+  path: /queries/{id}/status
+  tag: Query Approval
+- operationId: listSavedQueries
+  method: GET
+  path: /saved-queries
+  tag: Saved Queries
+- operationId: createSavedQuery
+  method: POST
+  path: /saved-queries
+  tag: Saved Queries
+- operationId: deleteSavedQuery
+  method: DELETE
+  path: /saved-queries/{id}
+  tag: Saved Queries
+- operationId: getSavedQuery
+  method: GET
+  path: /saved-queries/{id}
+  tag: Saved Queries
+- operationId: updateSavedQuery
+  method: PATCH
+  path: /saved-queries/{id}
+  tag: Saved Queries
+- operationId: executeSavedQuery
+  method: POST
+  path: /saved-queries/{id}/run
+  tag: Saved Queries
+- operationId: listUsageRecords
+  method: GET
+  path: /usage
+  tag: Usage
+- operationId: listWebhookEndpoints
+  method: GET
+  path: /webhooks
+  tag: Webhooks
+- operationId: createWebhookEndpoint
+  method: POST
+  path: /webhooks
+  tag: Webhooks
+- operationId: deleteWebhookEndpoint
+  method: DELETE
+  path: /webhooks/{id}
+  tag: Webhooks
+- operationId: getWebhookEndpoint
+  method: GET
+  path: /webhooks/{id}
+  tag: Webhooks
+- operationId: updateWebhookEndpoint
+  method: PATCH
+  path: /webhooks/{id}
+  tag: Webhooks
+- operationId: listWebhookDeliveries
+  method: GET
+  path: /webhooks/{id}/deliveries
+  tag: Webhooks
+- operationId: testWebhookEndpoint
+  method: POST
+  path: /webhooks/{id}/test
+  tag: Webhooks
+- operationId: listWorkflowCredentials
+  method: GET
+  path: /workflow-credentials
+  tag: Workflow Credentials
+- operationId: createWorkflowCredential
+  method: POST
+  path: /workflow-credentials
+  tag: Workflow Credentials
+- operationId: deleteWorkflowCredential
+  method: DELETE
+  path: /workflow-credentials/{id}
+  tag: Workflow Credentials
+- operationId: getWorkflowCredential
+  method: GET
+  path: /workflow-credentials/{id}
+  tag: Workflow Credentials
+- operationId: rotateWorkflowCredential
+  method: PATCH
+  path: /workflow-credentials/{id}
+  tag: Workflow Credentials
+- operationId: deleteWorkflow
+  method: DELETE
+  path: /workflows/{id}
+  tag: Workflows
+- operationId: getWorkflow
+  method: GET
+  path: /workflows/{id}
+  tag: Workflows
+- operationId: updateWorkflow
+  method: PATCH
+  path: /workflows/{id}
+  tag: Workflows
+- operationId: testWorkflowAction
+  method: POST
+  path: /workflows/{id}/actions/{order}/test
+  tag: Workflows
+- operationId: previewWorkflow
+  method: POST
+  path: /workflows/{id}/preview
+  tag: Workflows
+- operationId: listWorkflowRuns
+  method: GET
+  path: /workflows/{id}/runs
+  tag: Workflows
+coverage:
+  mcp_tools: 9
+  rest_operations: 80
+  operations_reachable_via_mcp: 9
+  rest_only_operations: 71
+  mcp_only_tools: 0
+  percent_rest_covered_by_mcp: 11.2

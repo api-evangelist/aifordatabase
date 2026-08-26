@@ -1,0 +1,114 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay — AI for Database API
+  version: 1.0.0
+extends: ../openapi/aifordatabase-openapi.yml
+x-provenance:
+  generated: '2026-08-26'
+  method: generated
+  source: 'Derived from the provider''s published docs and this repo''s artifacts; applied to the verbatim OpenAPI 3.1 at https://app.aifordatabase.com/api/v1/openapi.json (never mutated in place).'
+  scope: >-
+    Adds only facts the provider itself publishes elsewhere (contact, licence, docs
+    links, rate limits, reversibility and dry-run semantics). It invents no operation,
+    no parameter and no value.
+actions:
+- target: $.info
+  description: Attach provider contact, terms and external documentation the OpenAPI omits.
+  update:
+    contact:
+      name: AI for Database
+      email: hello@aifordatabase.com
+      url: https://www.aifordatabase.com/contact/
+    termsOfService: https://www.aifordatabase.com/terms/
+    x-privacy-policy: https://www.aifordatabase.com/privacy/
+    x-provider: AI for Database (a Wavicle.tech product)
+- target: $
+  description: Attach external documentation pointing at the human docs the spec does not link.
+  update:
+    externalDocs:
+      description: AI for Database API documentation
+      url: https://www.aifordatabase.com/docs/api-overview/
+- target: $
+  description: Record the published per-organization rate limits and the exhaustion signal.
+  update:
+    x-rate-limits:
+      scope: per-organization
+      window: 1m
+      tiers:
+      - plan: Free
+        general: 60
+        chat: 20
+      - plan: Pro / Max
+        general: 300
+        chat: 100
+      - plan: Enterprise
+        general: 1000
+        chat: 500
+      exhaustion_status: 429
+      exhaustion_code: RATE_LIMITED
+      response_headers: []
+      source: https://www.aifordatabase.com/docs/api-overview/
+- target: $
+  description: Record the response envelope and pagination contract the docs state.
+  update:
+    x-conventions:
+      envelope: '{ data, error, meta }'
+      correlation_field: meta.requestId
+      pagination:
+        style: page-number
+        params: [page, pageSize]
+        response: meta.pagination
+        fields: [total, page, pageSize, totalPages]
+      idempotency: none
+      optimistic_concurrency: expectedDraftRevision
+      source: https://www.aifordatabase.com/docs/api-errors-and-retries/
+- target: $.components.securitySchemes.bearerAuth
+  description: Document the key scopes the auth page publishes but the scheme does not carry.
+  update:
+    x-scopes:
+      query: Direct SQL, saved-query runs, and query approval
+      chat: Natural-language questions and generated SQL
+      connections: Sanitized connections, schemas, health, and annotations
+      dashboards: Dashboards, widgets, and widget data
+      workflows: Workflow drafts, previews, tests, publishing, and runs
+      workflow_credentials: Encrypted outbound credentials; org admin role also required
+      usage: Usage records and budget status
+      webhooks: Signed event endpoints, tests, and deliveries
+      admin: API-key management and administrative operations
+      '*': Full access
+    x-scopes-docs: https://www.aifordatabase.com/docs/authentication/
+- target: $.paths['/workflows/{id}/run'].post
+  description: Flag the irreversible external delivery the provider warns about.
+  update:
+    x-side-effects: external-delivery
+    x-reversible: false
+    x-retry-safe: false
+    x-agent-guidance: >-
+      Real external delivery (email / webhook / Slack). May have completed even when no
+      successful response was received — do not blindly retry.
+- target: $.paths['/workflows/{id}/actions/{order}/test'].post
+  description: Flag the confirmed live action test as irreversible.
+  update:
+    x-side-effects: external-delivery
+    x-reversible: false
+    x-retry-safe: false
+    x-precondition: confirmDelivery=true
+- target: $.paths['/workflows/{id}/preview'].post
+  description: Mark the genuine dry-run operation.
+  update:
+    x-dry-run: true
+    x-side-effects: none
+    x-agent-guidance: Executes draft queries only; never contacts an external system and never persists a run.
+- target: $.paths['/webhooks/{id}/test'].post
+  description: Flag the webhook test send as a real delivery.
+  update:
+    x-side-effects: external-delivery
+    x-retry-safe: false
+- target: $.paths['/chat'].post
+  description: Record that this operation meters AI credits and can 402.
+  update:
+    x-metered: ai-credits
+    x-budget-endpoint: /usage/budget
+    x-agent-guidance: >-
+      Consumes AI credits and returns 402 when the budget is exhausted. For repeated or
+      known queries prefer POST /connections/{id}/query, which consumes none.

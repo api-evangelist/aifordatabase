@@ -1,0 +1,90 @@
+generated: '2026-08-26'
+method: derived
+source: openapi/aifordatabase-openapi.yml + https://www.aifordatabase.com/trust/
+api: AI for Database API
+standards:
+- id: openapi-3.1
+  conforms: true
+  evidence: 'openapi: 3.1.0 served at https://app.aifordatabase.com/api/v1/openapi.json; 46 paths, 80 operations, 73 component schemas, all with unique operationIds and summaries.'
+- id: llmstxt
+  conforms: true
+  evidence: 'https://www.aifordatabase.com/llms.txt (200, text/plain) plus /llms-full.txt; both list the canonical contract and a last-verified date.'
+- id: rfc9457
+  conforms: false
+  evidence: 'Errors use a custom {data, error, meta} envelope with application/json, not application/problem+json.'
+- id: oauth2
+  conforms: false
+  evidence: 'Only securityScheme is bearerAuth (http/bearer, bearerFormat "API Key", afd_ prefix). /.well-known/oauth-authorization-server -> 404.'
+- id: oidc
+  conforms: partial
+  evidence: 'The trust page advertises enterprise SSO via SAML 2.0 and OpenID Connect for the product UI. This is not exposed on the public API, and /.well-known/openid-configuration -> 404. Applies to human sign-in, not to API authentication.'
+- id: pagination
+  conforms: true
+  evidence: 'Uniform page-number pagination (page, pageSize) with meta.pagination {total, page, pageSize, totalPages} documented and present in the schema.'
+- id: idempotency
+  conforms: false
+  evidence: 'No Idempotency-Key header in the contract or docs; the provider explicitly lists unknown-outcome creates as unsafe to retry.'
+- id: optimistic-concurrency
+  conforms: true
+  evidence: 'expectedDraftRevision on PATCH /workflows/{id}, 409 on stale revision, 428 when omitted.'
+- id: json-schema-2020-12
+  conforms: true
+  evidence: 'OpenAPI 3.1 document; components.schemas use 2020-12 keywords including const, nullable-by-union, minItems/maxItems.'
+- id: webhooks
+  conforms: partial
+  evidence: >-
+    A managed webhook surface exists (endpoints, events subscription, signing secret,
+    delivery log, test send) but the OpenAPI document declares no top-level `webhooks`
+    object and no event-type enumeration, so the event catalogue is not machine-readable.
+- id: asyncapi
+  conforms: false
+  evidence: 'No AsyncAPI document published; /asyncapi.yaml and /asyncapi.json were not served.'
+- id: mcp
+  conforms: partial
+  evidence: >-
+    A stdio MCP server exists on npm (aifordatabase-mcp@0.1.2) exposing 9 tools over
+    the REST API. No remote/hosted MCP endpoint; the provider's llms.txt tells agents
+    not to assume a native MCP server.
+- id: a2a
+  conforms: false
+  evidence: '/.well-known/agent-card.json and /.well-known/agent.json returned 404 on www and 307 on app.'
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: '/.well-known/security.txt -> 404 on www.aifordatabase.com.'
+- id: rfc8615-well-known
+  conforms: false
+  evidence: 'No /.well-known/* document is served on any host (see well-known/aifordatabase-well-known.yml).'
+domain_standards:
+  note: >-
+    Reward-only check, honestly empty. AI for Database sits in text-to-SQL / BI /
+    workflow automation, a market with no adopted interchange standard for the API
+    layer (no SCIM, OData, OpenRTB, HL7, FHIR, ISO 20022 or equivalent applies). The
+    contract declares none, and none was invented to fill the slot. The closest thing
+    to a domain contract it does honour is the database dialects themselves — it
+    accepts native SQL for POSTGRES, MYSQL, MARIADB, MSSQL, SQLITE and MongoDB query
+    syntax — which is a data-source capability, not an API standard.
+  declared: []
+compliance:
+  certifications_held: []
+  claims:
+  - claim: SOC 2 Type II
+    status: not-certified
+    published_wording: '"Our infrastructure is designed to meet SOC 2 Type II standards... Formal certification is available for enterprise clients."'
+    source: https://www.aifordatabase.com/trust/
+  - claim: SOC 2
+    status: 'labelled "Enterprise Ready" on the security page, not asserted as held'
+    source: https://www.aifordatabase.com/security/
+  - claim: GDPR
+    status: 'labelled "Designed For" / "GDPR ready"; DPAs, right to deletion and data portability described as "available"'
+    source: https://www.aifordatabase.com/security/
+  - claim: HIPAA
+    status: 'labelled "Enterprise Available"'
+    source: https://www.aifordatabase.com/security/
+  - claim: ISO 27001
+    status: 'labelled "Aligned"'
+    source: https://www.aifordatabase.com/security/
+  finding: >-
+    Every compliance badge on this provider's site is qualified — "designed to meet",
+    "aligned", "available", "ready". Not one is stated as an achieved, audited
+    certification. A Compliance pointer is therefore NOT emitted in apis.yml; a
+    TrustCenter pointer is, because the trust page itself genuinely exists.

@@ -1,0 +1,512 @@
+generated: '2026-08-26'
+method: derived
+source: openapi/aifordatabase-openapi.yml
+api: AI for Database API
+note: 'Entity graph derived from components.schemas $ref links and *Id reference fields in the provider''s
+  own OpenAPI 3.1 document. Request/response wrapper schemas (*Create, *Update, *Request, *Input, *Result,
+  *Envelope) are excluded as shapes rather than entities. `resolvable: false` marks a foreign key whose
+  target entity the public contract does not expose as a resource — Organization and Project are referenced
+  by id but have no endpoints.'
+id_format: 'opaque strings; several are declared format: uuid (workflow credentials). No typed id prefixes
+  are published.'
+entities:
+- name: Annotation
+  field_count: 9
+  fields:
+  - id
+  - connectionId
+  - tableName
+  - columnName
+  - annotation
+  - dataType
+  - examples
+  - createdAt
+  - updatedAt
+- name: ApiKey
+  field_count: 7
+  fields:
+  - id
+  - keyPrefix
+  - name
+  - scopes
+  - lastUsedAt
+  - createdAt
+  - expiresAt
+- name: ApiKeyCreated
+  field_count: 7
+  fields:
+  - id
+  - name
+  - keyPrefix
+  - scopes
+  - expiresAt
+  - createdAt
+  - key
+- name: ApprovalRule
+  field_count: 8
+  fields:
+  - id
+  - orgId
+  - connectionId
+  - scope
+  - approvers
+  - isActive
+  - createdAt
+  - updatedAt
+- name: Budget
+  field_count: 6
+  fields:
+  - included
+  - topUp
+  - used
+  - remaining
+  - periodStart
+  - periodEnd
+- name: Connection
+  field_count: 14
+  fields:
+  - id
+  - name
+  - type
+  - host
+  - port
+  - database
+  - username
+  - sslEnabled
+  - isActive
+  - lastTestedAt
+  - lastError
+  - lastErrorDiagnosis
+  - schemaUpdatedAt
+  - createdAt
+- name: Conversation
+  field_count: 7
+  fields:
+  - id
+  - orgId
+  - userId
+  - connectionId
+  - title
+  - createdAt
+  - updatedAt
+- name: Dashboard
+  field_count: 8
+  fields:
+  - id
+  - orgId
+  - title
+  - description
+  - isPublic
+  - createdAt
+  - updatedAt
+  - widgets
+- name: Message
+  field_count: 10
+  fields:
+  - id
+  - conversationId
+  - role
+  - content
+  - sqlQuery
+  - resultSummary
+  - promptTokens
+  - completionTokens
+  - model
+  - createdAt
+- name: MetricDefinition
+  field_count: 10
+  fields:
+  - id
+  - orgId
+  - name
+  - description
+  - formula
+  - connectionId
+  - unit
+  - dimensions
+  - createdAt
+  - updatedAt
+- name: MetricValue
+  field_count: 4
+  fields:
+  - value
+  - unit
+  - asOf
+  - executionTime
+- name: PendingQuery
+  field_count: 12
+  fields:
+  - id
+  - connectionId
+  - connectionName
+  - connectionType
+  - apiKeyId
+  - query
+  - context
+  - status
+  - reviewNote
+  - result
+  - expiresAt
+  - createdAt
+- name: SavedQuery
+  field_count: 11
+  fields:
+  - id
+  - orgId
+  - connectionId
+  - name
+  - description
+  - query
+  - parameters
+  - tags
+  - isPublic
+  - createdAt
+  - updatedAt
+- name: UsageRecord
+  field_count: 9
+  fields:
+  - id
+  - orgId
+  - userId
+  - model
+  - promptTokens
+  - completionTokens
+  - costCents
+  - feature
+  - createdAt
+- name: WebhookDelivery
+  field_count: 8
+  fields:
+  - id
+  - endpointId
+  - event
+  - payload
+  - statusCode
+  - attempts
+  - deliveredAt
+  - createdAt
+- name: WebhookEndpoint
+  field_count: 8
+  fields:
+  - id
+  - orgId
+  - url
+  - secret
+  - events
+  - isActive
+  - createdAt
+  - updatedAt
+- name: Widget
+  field_count: 12
+  fields:
+  - id
+  - dashboardId
+  - connectionId
+  - type
+  - title
+  - query
+  - config
+  - width
+  - height
+  - position
+  - createdAt
+  - updatedAt
+- name: Workflow
+  field_count: 18
+  fields:
+  - id
+  - orgId
+  - name
+  - description
+  - connectionId
+  - projectId
+  - triggerType
+  - triggerConfig
+  - isActive
+  - draftRevision
+  - publishedVersion
+  - publishedDraftRevision
+  - publishedAt
+  - hasUnpublishedChanges
+  - createdAt
+  - updatedAt
+  - steps
+  - actions
+- name: WorkflowAction
+  field_count: 4
+  fields:
+  - id
+  - type
+  - config
+  - order
+- name: WorkflowActionAttempt
+  field_count: 16
+  fields:
+  - id
+  - runId
+  - actionId
+  - actionOrder
+  - attempt
+  - status
+  - method
+  - url
+  - requestBodyBytes
+  - statusCode
+  - durationMs
+  - responseHeaders
+  - responseBody
+  - error
+  - startedAt
+  - completedAt
+- name: WorkflowCredential
+  field_count: 9
+  fields:
+  - id
+  - name
+  - kind
+  - allowedHosts
+  - hasSecret
+  - lastTestedAt
+  - lastTestStatus
+  - createdAt
+  - updatedAt
+- name: WorkflowPreview
+  field_count: 7
+  fields:
+  - workflowId
+  - draftRevision
+  - status
+  - wouldRunActions
+  - actionsConfigured
+  - rowsLimitedTo
+  - steps
+- name: WorkflowPreviewStep
+  field_count: 9
+  fields:
+  - stepId
+  - name
+  - status
+  - rowCount
+  - columns
+  - rows
+  - executionTimeMs
+  - conditionMet
+  - error
+- name: WorkflowRun
+  field_count: 13
+  fields:
+  - id
+  - workflowId
+  - trigger
+  - status
+  - definitionVersion
+  - scheduledFor
+  - stepResults
+  - actionResults
+  - durationMs
+  - error
+  - startedAt
+  - completedAt
+  - actionAttempts
+- name: WorkflowStep
+  field_count: 6
+  fields:
+  - id
+  - name
+  - query
+  - stopIfEmpty
+  - order
+  - connectionId
+relationships:
+- from: Annotation
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: ApprovalRule
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: ApprovalRule
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: Conversation
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: Conversation
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: Conversation
+  to: User
+  type: belongs_to
+  via: userId
+  resolvable: false
+- from: Dashboard
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: Dashboard
+  to: Widget
+  type: has_many
+  via: widgets
+  resolvable: true
+- from: Message
+  to: Conversation
+  type: belongs_to
+  via: conversationId
+  resolvable: true
+- from: MetricDefinition
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: MetricDefinition
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: PendingQuery
+  to: ApiKey
+  type: belongs_to
+  via: apiKeyId
+  resolvable: true
+- from: PendingQuery
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: SavedQuery
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: SavedQuery
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: UsageRecord
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: UsageRecord
+  to: User
+  type: belongs_to
+  via: userId
+  resolvable: false
+- from: WebhookDelivery
+  to: WebhookEndpoint
+  type: belongs_to
+  via: endpointId
+  resolvable: true
+- from: WebhookEndpoint
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: Widget
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: Widget
+  to: Dashboard
+  type: belongs_to
+  via: dashboardId
+  resolvable: true
+- from: Workflow
+  to: WorkflowAction
+  type: has_many
+  via: actions
+  resolvable: true
+- from: Workflow
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+- from: Workflow
+  to: Organization
+  type: belongs_to
+  via: orgId
+  resolvable: false
+- from: Workflow
+  to: Project
+  type: belongs_to
+  via: projectId
+  resolvable: false
+- from: Workflow
+  to: WorkflowStep
+  type: has_many
+  via: steps
+  resolvable: true
+- from: WorkflowActionAttempt
+  to: Action
+  type: belongs_to
+  via: actionId
+  resolvable: false
+- from: WorkflowActionAttempt
+  to: Run
+  type: belongs_to
+  via: runId
+  resolvable: false
+- from: WorkflowPreview
+  to: WorkflowPreviewStep
+  type: has_many
+  via: steps
+  resolvable: true
+- from: WorkflowPreview
+  to: Workflow
+  type: belongs_to
+  via: workflowId
+  resolvable: true
+- from: WorkflowPreviewStep
+  to: Step
+  type: belongs_to
+  via: stepId
+  resolvable: false
+- from: WorkflowRun
+  to: WorkflowActionAttempt
+  type: has_many
+  via: actionAttempts
+  resolvable: true
+- from: WorkflowRun
+  to: Workflow
+  type: belongs_to
+  via: workflowId
+  resolvable: true
+- from: WorkflowStep
+  to: Connection
+  type: belongs_to
+  via: connectionId
+  resolvable: true
+coverage:
+  entities: 25
+  relationships: 34
+  unresolvable_targets:
+  - Action
+  - Organization
+  - Project
+  - Run
+  - Step
+  - User
+resource_roots:
+- Connection
+- Conversation
+- Dashboard
+- Workflow
+- WorkflowCredential
+- WebhookEndpoint
+- MetricDefinition
+- SavedQuery
+- ApprovalRule
+- ApiKey
+- UsageRecord

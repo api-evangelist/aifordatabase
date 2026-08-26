@@ -1,0 +1,75 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/docs/api-overview/
+sources:
+- https://www.aifordatabase.com/docs/api-overview/
+- https://www.aifordatabase.com/docs/api-errors-and-retries/
+api: AI for Database API
+limit_count: 6
+enforcement_scope: per-organization
+window: 1 minute
+rate_limits:
+- scope: per-account
+  plan: Free
+  class: general requests
+  limit: 60
+  window: 1m
+  burst: null
+- scope: per-account
+  plan: Free
+  class: chat requests
+  limit: 20
+  window: 1m
+  burst: null
+- scope: per-account
+  plan: Pro / Max
+  class: general requests
+  limit: 300
+  window: 1m
+  burst: null
+- scope: per-account
+  plan: Pro / Max
+  class: chat requests
+  limit: 100
+  window: 1m
+  burst: null
+- scope: per-account
+  plan: Enterprise
+  class: general requests
+  limit: 1000
+  window: 1m
+  burst: null
+- scope: per-account
+  plan: Enterprise
+  class: chat requests
+  limit: 500
+  window: 1m
+  burst: null
+exhaustion:
+  status: 429
+  error_code: RATE_LIMITED
+  body: '{"data": null, "error": {"code": "RATE_LIMITED", "message": "..."}, "meta": {...}}'
+  guidance: Retry with exponential backoff and jitter.
+response_headers:
+  documented: []
+  observed: []
+  retry_after: false
+  evidence: >-
+    Live unauthenticated GET https://app.aifordatabase.com/api/v1/connections on
+    2026-08-26 returned HTTP 401 with headers age, cache-control, content-type, date,
+    server, strict-transport-security, vary, x-matched-path, x-vercel-cache,
+    x-vercel-id — no X-RateLimit-*, no RateLimit-*, no Retry-After.
+gap: >-
+  This is the runtime-signal gap for this provider: the numbers are published clearly
+  in the docs, but no response header carries limit / remaining / reset, so an agent
+  can only discover exhaustion by being 429'd. Adding RFC 9331 RateLimit-* headers
+  (and Retry-After on 429) would close it.
+other_limits:
+- limit: 'Direct SQL query results cap at 500 rows'
+  source: 'aifordatabase-mcp run_query tool description (npm aifordatabase-mcp@0.1.2)'
+- limit: 'Workflow drafts: 1-5 query steps, max 10 delivery actions, max 20 headers per webhook action'
+  source: openapi/aifordatabase-openapi.yml (WorkflowUpdate, WebhookActionConfig)
+- limit: 'Free plan: up to 3 workflows'
+  source: https://www.aifordatabase.com/pricing/
+- limit: 'AI credit budget per billing period, readable via GET /usage/budget (402 on exhaustion)'
+  source: openapi/aifordatabase-openapi.yml

@@ -1,0 +1,35 @@
+generated: '2026-08-26'
+method: generated
+source: openapi/aifordatabase-openapi.yml + https://www.aifordatabase.com/docs/
+api: AI for Database API
+note: >-
+  Every operationId referenced in these skills was verified against the provider's own
+  OpenAPI 3.1 document before being written. No operation, parameter or status code was
+  invented. The provider publishes no skills/ or AGENTS.md of its own; it does publish
+  llms.txt, llms-full.txt and a JSON capability manifest at /api/agents, all of which
+  informed these.
+skills:
+- name: aifordatabase-answer-a-database-question
+  file: aifordatabase-answer-a-database-question.md
+  summary: Discover a connection, read its schema and annotations, then answer with deterministic SQL or natural-language chat.
+  scopes: [connections, query, chat, usage]
+  operations: [listConnections, getConnectionSchema, executeQuery, sendChatMessage, listAnnotations, getUsageBudget]
+  side_effects: read-only
+- name: aifordatabase-ship-a-scheduled-alert
+  file: aifordatabase-ship-a-scheduled-alert.md
+  summary: The published six-step workflow lifecycle — discover, validate, draft, preview, test one live action, publish immutably.
+  scopes: [connections, query, workflows, workflow_credentials]
+  operations: [listConnections, executeQuery, createWorkflowCredential, createWorkflow, getWorkflow, previewWorkflow, testWorkflowAction, updateWorkflow, listWorkflowRuns, deleteWorkflow]
+  side_effects: 'external delivery at steps 05 and 06 — irreversible'
+- name: aifordatabase-govern-query-approval
+  file: aifordatabase-govern-query-approval.md
+  summary: Submit a query for human approval instead of executing it; define rules, poll status, approve or reject.
+  scopes: [query]
+  operations: [listApprovalRules, createApprovalRule, updateApprovalRule, deleteApprovalRule, submitQueryForApproval, getQueryApprovalStatus, listPendingQueries, approveQuery, rejectQuery]
+  side_effects: 'approval executes the query; rejection is the only reversal and only before approval'
+- name: aifordatabase-subscribe-to-events
+  file: aifordatabase-subscribe-to-events.md
+  summary: Register a signed webhook endpoint, test it, read deliveries — and work around the unpublished event vocabulary and signing scheme.
+  scopes: [webhooks]
+  operations: [listWebhookEndpoints, createWebhookEndpoint, getWebhookEndpoint, updateWebhookEndpoint, deleteWebhookEndpoint, testWebhookEndpoint, listWebhookDeliveries]
+  side_effects: 'test send is a real delivery'

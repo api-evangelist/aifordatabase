@@ -1,0 +1,99 @@
+generated: '2026-08-26'
+method: searched
+source: https://www.aifordatabase.com/docs/authentication/
+sources:
+- https://www.aifordatabase.com/docs/authentication/
+- https://aifordatabase.com/api/agents
+- openapi/aifordatabase-openapi.yml
+api: AI for Database API
+summary:
+  types:
+  - http
+  model: scoped-bearer-api-key
+  oauth: false
+  openid_connect: false
+  mtls: false
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  bearerFormat: API Key
+  description: Platform API key starting with afd_
+  header: Authorization
+  value_form: 'Bearer afd_...'
+  applied: global
+  applied_evidence: 'Document-level security: [{bearerAuth: []}] in the OpenAPI 3.1 spec — applied, not merely defined.'
+  sources:
+  - openapi/aifordatabase-openapi.yml
+  - https://www.aifordatabase.com/docs/authentication/
+key_management:
+  issue_ui: 'Settings > API Keys in app.aifordatabase.com'
+  issue_api: 'POST /api/v1/keys (createApiKey, admin scope)'
+  list_api: 'GET /api/v1/keys (listApiKeys)'
+  revoke_api: 'DELETE /api/v1/keys/{id} (revokeApiKey)'
+  prefix: afd_
+  shown_once: true
+  expiry: optional per key
+  identity: 'A key authenticates on behalf of the organization, carrying the role of the user who created it.'
+  test_mode: false
+  test_mode_note: 'The provider states there are no afdb_live_ / afdb_test_ key variants.'
+scopes:
+  model: api-key-scopes
+  wildcard: '*'
+  docs: https://www.aifordatabase.com/docs/authentication/
+  note: >-
+    These are API-key permission scopes, not OAuth scopes — there is no authorization
+    server, no token endpoint and no /.well-known/oauth-authorization-server (404). No
+    OAuthScopes pointer is emitted for that reason; the scope reference lives here.
+  values:
+  - name: query
+    grants: Direct SQL execution, query submission, approval status, saved query runs
+  - name: chat
+    grants: Natural-language chat endpoints
+  - name: connections
+    grants: Sanitized database connection metadata, schemas, and annotations
+  - name: dashboards
+    grants: Dashboards and widgets
+  - name: workflows
+    grants: Workflows and workflow runs
+  - name: workflow_credentials
+    grants: Encrypted outbound workflow credentials
+    additional_requirement: organization admin role
+  - name: usage
+    grants: Usage records and budget info
+  - name: webhooks
+    grants: Webhook endpoints and deliveries
+  - name: admin
+    grants: Key management and other admin operations
+  - name: '*'
+    grants: Full access
+role_gate:
+  note: >-
+    Some operations require an organization admin role regardless of key scopes.
+    Workflow credential creation, rotation, listing and deletion require BOTH the
+    workflow_credentials scope AND the admin role.
+failure_modes:
+- status: 401
+  code: UNAUTHORIZED
+  cause: Invalid or expired key
+- status: 403
+  code: FORBIDDEN
+  cause: Key lacks the required scope, or the operation additionally needs an admin role
+second_credential_class:
+  name: workflow credentials
+  purpose: 'Authenticate an outbound webhook action to ITS destination — not callers to this API.'
+  properties: [encrypted, write-only, destination-bound]
+  rule: 'Never accepted inline in a workflow definition; referenced by credentialId.'
+  operations: [createWorkflowCredential, rotateWorkflowCredential, deleteWorkflowCredential, listWorkflowCredentials, getWorkflowCredential]
+  docs: https://www.aifordatabase.com/docs/outbound-credentials/
+best_practices_published:
+- Store API keys in environment variables, never in code.
+- Use the narrowest scopes necessary.
+- Rotate keys periodically and revoke unused keys.
+- Create separate keys per integration so each can be revoked independently.
+enterprise_sso:
+  saml2: true
+  oidc: true
+  mfa: 'available on all plans'
+  scope: 'Human sign-in to the product UI on the Enterprise plan; not an API authentication path.'
+  source: https://www.aifordatabase.com/trust/
