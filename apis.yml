@@ -7,6 +7,18 @@ description: 'AI for Database is a natural-language data layer for operational d
   for AI agents: a scoped Bearer-auth contract (afd_ keys, nine permission scopes) documented by a live OpenAPI 3.1 spec
   with 80 operations, a paused-draft workflow lifecycle with a real dry-run preview and a confirmation-gated live action
   test, human query approval, and agent-native discovery surfaces at llms.txt, llms-full.txt and a JSON capability manifest.'
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://www.aifordatabase.com/logo.png
 url: https://raw.githubusercontent.com/api-evangelist/ai-for-database/refs/heads/main/apis.yml
 created: '2026-08-26'
