@@ -25,6 +25,25 @@ created: '2026-08-26'
 modified: '2026-08-26'
 specificationVersion: '0.21'
 tags:
+- Artificial Intelligence
+- Database
+- Analytics
+- Developer Tools
+- Natural Language Query
+- Text-to-SQL
+- Dashboards
+- Business Intelligence
+- Workflow-Automation
+- Alerts
+- agent-native
+- llms-txt
+- OpenAPI
+- Webhook
+- MCP
+- PostgreSQL
+- MySQL
+- MongoDB
+tags_raw:
 - AI
 - Database
 - Analytics
@@ -446,6 +465,8 @@ apis:
   humanURL: https://aifordatabase.com/docs/api-overview/
   baseURL: https://app.aifordatabase.com/api/v1
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
