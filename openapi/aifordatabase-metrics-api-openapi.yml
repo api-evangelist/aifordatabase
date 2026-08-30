@@ -1,0 +1,382 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Metrics API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Metrics
+  description: Define and evaluate metric formulas against connections
+paths:
+  /metrics:
+    get:
+      tags:
+      - Metrics
+      summary: List metrics
+      operationId: listMetrics
+      description: List metric definitions for the organization, optionally filtered by connectionId.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      - name: connectionId
+        in: query
+        schema:
+          type: string
+        description: Filter by connection
+      responses:
+        '200':
+          description: Paginated metrics
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MetricDefinition'
+    post:
+      tags:
+      - Metrics
+      summary: Create metric
+      operationId: createMetric
+      description: Create a new metric definition with an SQL formula.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetricCreate'
+      responses:
+        '201':
+          description: Metric created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/MetricDefinition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: A metric with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /metrics/{id}:
+    get:
+      tags:
+      - Metrics
+      summary: Get metric
+      operationId: getMetric
+      description: Get a single metric definition by ID.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Metric details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/MetricDefinition'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Metrics
+      summary: Update metric
+      operationId: updateMetric
+      description: Update metric definition properties.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetricUpdate'
+      responses:
+        '200':
+          description: Metric updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/MetricDefinition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Duplicate metric name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      tags:
+      - Metrics
+      summary: Delete metric
+      operationId: deleteMetric
+      description: Delete a metric definition.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Metric deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /metrics/{id}/value:
+    get:
+      tags:
+      - Metrics
+      summary: Get metric value
+      operationId: getMetricValue
+      description: Execute the metric formula and return the current computed value.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: connectionId
+        in: query
+        schema:
+          type: string
+        description: Override the metric's default connection
+      responses:
+        '200':
+          description: Metric value
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/MetricValue'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Formula execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+components:
+  schemas:
+    MetricValue:
+      type: object
+      properties:
+        value:
+          description: The computed metric value
+        unit:
+          type: string
+          nullable: true
+        asOf:
+          type: string
+          format: date-time
+        executionTime:
+          type: number
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    MetricCreate:
+      type: object
+      required:
+      - name
+      - formula
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        formula:
+          type: string
+        connectionId:
+          type: string
+        unit:
+          type: string
+        dimensions:
+          type: string
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    MetricDefinition:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        formula:
+          type: string
+          description: SQL query whose first column of first row yields the metric value
+        connectionId:
+          type: string
+          nullable: true
+        unit:
+          type: string
+          nullable: true
+        dimensions:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    MetricUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        formula:
+          type: string
+        connectionId:
+          type: string
+        unit:
+          type: string
+        dimensions:
+          type: string
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

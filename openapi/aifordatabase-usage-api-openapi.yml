@@ -1,0 +1,167 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Usage API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Usage
+  description: View usage records and budget information
+paths:
+  /usage:
+    get:
+      tags:
+      - Usage
+      summary: Usage records
+      operationId: listUsageRecords
+      description: List AI usage records for the organization.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated usage records
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/UsageRecord'
+  /usage/budget:
+    get:
+      tags:
+      - Usage
+      summary: Budget info
+      operationId: getUsageBudget
+      description: Get the current billing period budget including included credits, top-ups, usage, and remaining balance.
+      responses:
+        '200':
+          description: Budget summary
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Budget'
+components:
+  schemas:
+    Budget:
+      type: object
+      properties:
+        included:
+          type: integer
+          description: Included budget in cents
+        topUp:
+          type: integer
+          description: Top-up budget in cents
+        used:
+          type: integer
+          description: Used budget in cents
+        remaining:
+          type: integer
+          description: Remaining budget in cents
+        periodStart:
+          type: string
+          format: date-time
+          nullable: true
+        periodEnd:
+          type: string
+          format: date-time
+          nullable: true
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    UsageRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        userId:
+          type: string
+        model:
+          type: string
+        promptTokens:
+          type: integer
+        completionTokens:
+          type: integer
+        costCents:
+          type: number
+        feature:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

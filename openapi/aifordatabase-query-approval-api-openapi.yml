@@ -1,0 +1,578 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Query Approval API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Query Approval
+  description: Submit queries for human approval before execution
+paths:
+  /approval-rules:
+    get:
+      tags:
+      - Query Approval
+      summary: List rules
+      operationId: listApprovalRules
+      description: List query approval rules for the organization. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated approval rules
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ApprovalRule'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - Query Approval
+      summary: Create rule
+      operationId: createApprovalRule
+      description: Create a new query approval rule. Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalRuleCreate'
+      responses:
+        '201':
+          description: Approval rule created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ApprovalRule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /approval-rules/{id}:
+    get:
+      tags:
+      - Query Approval
+      summary: Get rule
+      operationId: getApprovalRule
+      description: Get a single approval rule by ID. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Approval rule details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ApprovalRule'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Query Approval
+      summary: Update rule
+      operationId: updateApprovalRule
+      description: Update an approval rule. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalRuleUpdate'
+      responses:
+        '200':
+          description: Approval rule updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ApprovalRule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Query Approval
+      summary: Delete rule
+      operationId: deleteApprovalRule
+      description: Delete an approval rule. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Approval rule deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /queries/submit:
+    post:
+      tags:
+      - Query Approval
+      summary: Submit query for approval
+      operationId: submitQueryForApproval
+      description: Submit a SQL query for human approval before execution. Returns a pending query ID for status polling.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuerySubmitRequest'
+      responses:
+        '202':
+          description: Query submitted for approval
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        pendingQueryId:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                          - PENDING
+                        expiresAt:
+                          type: string
+                          format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /queries/{id}/status:
+    get:
+      tags:
+      - Query Approval
+      summary: Get query status
+      operationId: getQueryApprovalStatus
+      description: Get the current status of a pending query. Automatically marks expired queries.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Pending query status
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PendingQuery'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /queries/pending:
+    get:
+      tags:
+      - Query Approval
+      summary: List pending queries
+      operationId: listPendingQueries
+      description: List all queries awaiting approval. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated pending queries
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/PendingQuery'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /queries/{id}/approve:
+    post:
+      tags:
+      - Query Approval
+      summary: Approve query
+      operationId: approveQuery
+      description: Approve a pending query and execute it. The query result is returned in the response. Only authorized approvers can approve.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveRejectRequest'
+      responses:
+        '200':
+          description: Query approved and executed
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ApprovalResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Query execution failed after approval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /queries/{id}/reject:
+    post:
+      tags:
+      - Query Approval
+      summary: Reject query
+      operationId: rejectQuery
+      description: Reject a pending query with an optional note.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveRejectRequest'
+      responses:
+        '200':
+          description: Query rejected
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                          - REJECTED
+                        reviewedBy:
+                          type: string
+                        reviewNote:
+                          type: string
+                          nullable: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    ApprovalResult:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+          - APPROVED
+          - REJECTED
+        reviewedBy:
+          type: string
+        reviewNote:
+          type: string
+          nullable: true
+        result:
+          $ref: '#/components/schemas/QueryResult'
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    ApproveRejectRequest:
+      type: object
+      properties:
+        note:
+          type: string
+          description: Optional reviewer note
+    QuerySubmitRequest:
+      type: object
+      required:
+      - connectionId
+      - query
+      properties:
+        connectionId:
+          type: string
+        query:
+          type: string
+        context:
+          type: string
+          description: Optional description of why this query needs to run
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    ApprovalRule:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        scope:
+          type: string
+        approvers:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PendingQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        connectionId:
+          type: string
+        connectionName:
+          type: string
+          nullable: true
+        connectionType:
+          type: string
+          nullable: true
+        apiKeyId:
+          type: string
+          nullable: true
+        query:
+          type: string
+        context:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+          - EXPIRED
+        reviewNote:
+          type: string
+          nullable: true
+        result:
+          nullable: true
+          description: Query result (only present after approval)
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    ApprovalRuleCreate:
+      type: object
+      required:
+      - approvers
+      properties:
+        connectionId:
+          type: string
+        scope:
+          type: string
+          default: all
+        approvers:
+          type: array
+          items:
+            type: string
+          description: User IDs of authorized approvers
+    ApprovalRuleUpdate:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          nullable: true
+        scope:
+          type: string
+        approvers:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

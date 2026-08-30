@@ -1,0 +1,218 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Chat API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Chat
+  description: Send natural-language messages and receive AI-generated SQL and insights
+paths:
+  /chat:
+    post:
+      tags:
+      - Chat
+      summary: Send message
+      operationId: sendChatMessage
+      description: 'Send a natural-language message. Returns AI response with optional SQL generation and execution. Set `stream: true` for Server-Sent Events streaming.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Chat response (sync mode)
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ChatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          description: Credits exhausted or upgrade required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        200 (stream):
+          description: Server-Sent Events stream (when stream=true). Each event is a JSON object with `type` field.
+components:
+  schemas:
+    ChatResponse:
+      type: object
+      properties:
+        messageId:
+          type: string
+        conversationId:
+          type: string
+        content:
+          type: string
+          description: AI-generated natural language response
+        sqlQuery:
+          type: string
+          nullable: true
+        intent:
+          type: string
+          nullable: true
+        queryResult:
+          $ref: '#/components/schemas/QueryResult'
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+              detail:
+                type: string
+              sql:
+                type: string
+                nullable: true
+              queryResult:
+                type: object
+                nullable: true
+                properties:
+                  columns:
+                    type: array
+                    items:
+                      type: string
+                  rowCount:
+                    type: integer
+                  executionTime:
+                    type: number
+              queryError:
+                type: string
+                nullable: true
+        usage:
+          type: object
+          properties:
+            model:
+              type: string
+            promptTokens:
+              type: integer
+            completionTokens:
+              type: integer
+    ChatRequest:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          type: string
+          description: Natural-language question or instruction
+        connectionId:
+          type: string
+          description: Database connection to use for SQL execution
+        conversationId:
+          type: string
+          description: Continue an existing conversation
+        stream:
+          type: boolean
+          default: false
+          description: Set true for Server-Sent Events streaming
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

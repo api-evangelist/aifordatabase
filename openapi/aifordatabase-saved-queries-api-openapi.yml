@@ -1,0 +1,405 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Saved Queries API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Saved Queries
+  description: Store, parameterize, and execute reusable SQL queries
+paths:
+  /saved-queries:
+    get:
+      tags:
+      - Saved Queries
+      summary: List saved queries
+      operationId: listSavedQueries
+      description: List saved queries, optionally filtered by connectionId or tags.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      - name: connectionId
+        in: query
+        schema:
+          type: string
+        description: Filter by connection
+      - name: tags
+        in: query
+        schema:
+          type: string
+        description: Filter by tag substring
+      responses:
+        '200':
+          description: Paginated saved queries
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/SavedQuery'
+    post:
+      tags:
+      - Saved Queries
+      summary: Create saved query
+      operationId: createSavedQuery
+      description: Create a new reusable saved query with optional parameterized placeholders.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedQueryCreate'
+      responses:
+        '201':
+          description: Saved query created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SavedQuery'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Duplicate name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /saved-queries/{id}:
+    get:
+      tags:
+      - Saved Queries
+      summary: Get saved query
+      operationId: getSavedQuery
+      description: Get a single saved query by ID.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Saved query details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SavedQuery'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Saved Queries
+      summary: Update saved query
+      operationId: updateSavedQuery
+      description: Update saved query properties.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedQueryUpdate'
+      responses:
+        '200':
+          description: Saved query updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SavedQuery'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Duplicate name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      tags:
+      - Saved Queries
+      summary: Delete saved query
+      operationId: deleteSavedQuery
+      description: Delete a saved query.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Saved query deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /saved-queries/{id}/run:
+    post:
+      tags:
+      - Saved Queries
+      summary: Execute saved query
+      operationId: executeSavedQuery
+      description: Execute a saved query with optional parameter substitution. Parameters replace {{paramName}} placeholders in the query.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedQueryRunRequest'
+      responses:
+        '200':
+          description: Query execution result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/QueryResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Query execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+components:
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+  schemas:
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    SavedQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        connectionId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of parameter definitions
+        tags:
+          type: string
+          nullable: true
+        isPublic:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SavedQueryCreate:
+      type: object
+      required:
+      - name
+      - query
+      - connectionId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of { name, type, required }
+        tags:
+          type: string
+        isPublic:
+          type: boolean
+          default: true
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    SavedQueryRunRequest:
+      type: object
+      properties:
+        params:
+          type: object
+          additionalProperties: true
+          description: Key-value pairs for query placeholders
+    SavedQueryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+        tags:
+          type: string
+        isPublic:
+          type: boolean
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

@@ -1,0 +1,529 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Dashboards API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Dashboards
+  description: Create and manage dashboards and their widgets
+paths:
+  /dashboards:
+    get:
+      tags:
+      - Dashboards
+      summary: List dashboards
+      operationId: listDashboards
+      description: List all dashboards for the organization.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated dashboards
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Dashboard'
+    post:
+      tags:
+      - Dashboards
+      summary: Create dashboard
+      operationId: createDashboard
+      description: Create a new dashboard.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardCreate'
+      responses:
+        '201':
+          description: Dashboard created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Dashboard'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /dashboards/{id}:
+    get:
+      tags:
+      - Dashboards
+      summary: Get dashboard
+      operationId: getDashboard
+      description: Get a dashboard with all its widgets.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Dashboard with widgets
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Dashboard'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Dashboards
+      summary: Update dashboard
+      operationId: updateDashboard
+      description: Update dashboard properties.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardUpdate'
+      responses:
+        '200':
+          description: Dashboard updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Dashboard'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Dashboards
+      summary: Delete dashboard
+      operationId: deleteDashboard
+      description: Delete a dashboard and all its widgets.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Dashboard deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /dashboards/{id}/widgets:
+    get:
+      tags:
+      - Dashboards
+      summary: List widgets
+      operationId: listWidgets
+      description: List all widgets for a dashboard, ordered by position.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: List of widgets
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Widget'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Dashboards
+      summary: Create widget
+      operationId: createWidget
+      description: Add a new widget to a dashboard.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WidgetCreate'
+      responses:
+        '201':
+          description: Widget created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Widget'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /dashboards/{id}/widgets/{widgetId}:
+    patch:
+      tags:
+      - Dashboards
+      summary: Update widget
+      operationId: updateWidget
+      description: Update widget properties.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: widgetId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WidgetUpdate'
+      responses:
+        '200':
+          description: Widget updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Widget'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Dashboards
+      summary: Delete widget
+      operationId: deleteWidget
+      description: Remove a widget from a dashboard.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: widgetId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Widget deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /dashboards/{id}/widgets/{widgetId}/data:
+    get:
+      tags:
+      - Dashboards
+      summary: Get widget data
+      operationId: getWidgetData
+      description: Execute the widget's SQL query against its connection and return the result set.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: widgetId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Query result for the widget
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/QueryResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    DashboardUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        isPublic:
+          type: boolean
+    Widget:
+      type: object
+      properties:
+        id:
+          type: string
+        dashboardId:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        type:
+          type: string
+        title:
+          type: string
+        query:
+          type: string
+        config:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        position:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    WidgetUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        query:
+          type: string
+        config:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        position:
+          type: integer
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    DashboardCreate:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        isPublic:
+          type: boolean
+          default: false
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    WidgetCreate:
+      type: object
+      required:
+      - type
+      - title
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        query:
+          type: string
+        connectionId:
+          type: string
+        config:
+          type: string
+        width:
+          type: integer
+          default: 6
+        height:
+          type: integer
+          default: 4
+        position:
+          type: integer
+          default: 0
+    Dashboard:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        isPublic:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        widgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Widget'
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

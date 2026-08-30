@@ -1,0 +1,391 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Webhooks API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Webhooks
+  description: Manage webhook endpoints, deliveries, and test events
+paths:
+  /webhooks:
+    get:
+      tags:
+      - Webhooks
+      summary: List endpoints
+      operationId: listWebhookEndpoints
+      description: List all webhook endpoints for the organization.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated webhook endpoints
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/WebhookEndpoint'
+    post:
+      tags:
+      - Webhooks
+      summary: Create endpoint
+      operationId: createWebhookEndpoint
+      description: Create a new webhook endpoint. The signing secret is returned only in the creation response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookEndpointCreate'
+      responses:
+        '201':
+          description: Webhook endpoint created (includes full secret)
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WebhookEndpoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /webhooks/{id}:
+    get:
+      tags:
+      - Webhooks
+      summary: Get endpoint
+      operationId: getWebhookEndpoint
+      description: Get a webhook endpoint by ID. The secret is masked.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Webhook endpoint (secret masked)
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WebhookEndpoint'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Webhooks
+      summary: Update endpoint
+      operationId: updateWebhookEndpoint
+      description: Update webhook endpoint URL, events, or active status.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookEndpointUpdate'
+      responses:
+        '200':
+          description: Webhook endpoint updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WebhookEndpoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Webhooks
+      summary: Delete endpoint
+      operationId: deleteWebhookEndpoint
+      description: Delete a webhook endpoint and all its delivery history.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Webhook endpoint deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /webhooks/{id}/deliveries:
+    get:
+      tags:
+      - Webhooks
+      summary: Get deliveries
+      operationId: listWebhookDeliveries
+      description: List delivery attempts for a webhook endpoint.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated deliveries
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/WebhookDelivery'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /webhooks/{id}/test:
+    post:
+      tags:
+      - Webhooks
+      summary: Send test event
+      operationId: testWebhookEndpoint
+      description: Send a test webhook event to the endpoint and return the delivery result.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Test delivery result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WebhookTestResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    WebhookEndpointCreate:
+      type: object
+      required:
+      - url
+      - events
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+          description: Event types to subscribe to, or ['*'] for all
+        isActive:
+          type: boolean
+          default: true
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    WebhookEndpoint:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        url:
+          type: string
+          format: uri
+        secret:
+          type: string
+          description: Full secret shown only on creation; masked on subsequent reads
+        events:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    WebhookDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+        endpointId:
+          type: string
+        event:
+          type: string
+        payload:
+          type: string
+        statusCode:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    WebhookEndpointUpdate:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    WebhookTestResult:
+      type: object
+      properties:
+        delivery:
+          $ref: '#/components/schemas/WebhookDelivery'
+        success:
+          type: boolean
+        error:
+          type: string
+          nullable: true
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

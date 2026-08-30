@@ -1,0 +1,844 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Connections API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Connections
+  description: Manage database connections, schemas, annotations, and execute SQL queries
+paths:
+  /connections:
+    get:
+      tags:
+      - Connections
+      summary: List connections
+      operationId: listConnections
+      description: Returns paginated list of database connections. Admins see all org connections; regular users see only assigned connections.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated list of connections
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Connection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+      - Connections
+      summary: Create connection
+      operationId: createConnection
+      description: Create a new database connection. Admin only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionCreate'
+      responses:
+        '201':
+          description: Connection created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Connection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /connections/{id}:
+    get:
+      tags:
+      - Connections
+      summary: Get connection
+      operationId: getConnection
+      description: Get a single database connection by ID.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Connection details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Connection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Connections
+      summary: Update connection
+      operationId: updateConnection
+      description: Update a database connection. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionUpdate'
+      responses:
+        '200':
+          description: Connection updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Connection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Connections
+      summary: Delete connection
+      operationId: deleteConnection
+      description: Delete a database connection. Admin only.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Connection deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /connections/{id}/test:
+    post:
+      tags:
+      - Connections
+      summary: Test connection
+      operationId: testConnection
+      description: Test connectivity to the database and report latency. On the first successful test of a connection with no cached schema, this also introspects and caches the schema + AI overview, so create → test is the complete setup flow. Failures include a structured `diagnosis` (see Diagnosis schema) in error details.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/TestResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Connection test failed (error.details.diagnosis explains the failure and fix steps)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /connections/{id}/schema:
+    get:
+      tags:
+      - Connections
+      summary: Get schema
+      operationId: getConnectionSchema
+      description: Return the cached introspected database schema.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Schema data
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SchemaResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Connections
+      summary: Introspect schema
+      operationId: introspectConnectionSchema
+      description: Re-introspect the database schema from the live connection and cache the result.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Freshly introspected schema
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SchemaResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Introspection failed (error.details.diagnosis explains the failure and fix steps)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /connections/{id}/query:
+    post:
+      tags:
+      - Connections
+      summary: Execute SQL
+      operationId: executeQuery
+      description: Execute a raw SQL query against the connection and return results.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Query result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/QueryResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Query execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /connections/{id}/annotations:
+    get:
+      tags:
+      - Connections
+      summary: List annotations
+      operationId: listAnnotations
+      description: List schema annotations for a connection, optionally filtered by table.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      - name: table
+        in: query
+        schema:
+          type: string
+        description: Filter by table name
+      responses:
+        '200':
+          description: Paginated list of annotations
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Annotation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Connections
+      summary: Create or upsert annotation
+      operationId: createAnnotation
+      description: Create a new schema annotation or update an existing one (upserts on tableName + columnName).
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnotationCreate'
+      responses:
+        '201':
+          description: Annotation created or upserted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Annotation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /connections/{id}/annotations/{annotationId}:
+    get:
+      tags:
+      - Connections
+      summary: Get annotation
+      operationId: getAnnotation
+      description: Get a single schema annotation by ID.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: annotationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Annotation details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Annotation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Connections
+      summary: Update annotation
+      operationId: updateAnnotation
+      description: Update an existing schema annotation.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: annotationId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnotationUpdate'
+      responses:
+        '200':
+          description: Annotation updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Annotation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - Connections
+      summary: Delete annotation
+      operationId: deleteAnnotation
+      description: Delete a schema annotation.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: annotationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Annotation deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /connections/{id}/annotations/auto:
+    post:
+      tags:
+      - Connections
+      summary: Auto-generate annotations
+      operationId: autoGenerateAnnotations
+      description: Use AI to automatically generate schema annotations for all or specified tables. Requires a prior schema introspection.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoAnnotationRequest'
+      responses:
+        '202':
+          description: Auto-annotation queued
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AutoAnnotationResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          description: Schema not yet introspected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+components:
+  schemas:
+    ConnectionCreate:
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - POSTGRES
+          - MYSQL
+          - MARIADB
+          - MSSQL
+          - MONGODB
+          - SQLITE
+        host:
+          type: string
+        port:
+          type: integer
+        database:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+          description: Database password (write-only, never returned). `encryptedPassword` is accepted as an alias.
+        encryptedPassword:
+          type: string
+          description: Alias of `password`.
+        sslEnabled:
+          type: boolean
+          default: false
+          description: '`ssl` is accepted as an alias.'
+    SchemaResult:
+      type: object
+      properties:
+        schema:
+          type: object
+          description: Introspected database schema with tables, columns, and types
+        schemaSummary:
+          type: string
+          nullable: true
+        schemaUpdatedAt:
+          type: string
+          format: date-time
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    AutoAnnotationResult:
+      type: object
+      properties:
+        message:
+          type: string
+        connectionId:
+          type: string
+        tables:
+          type: array
+          items:
+            type: string
+        tableCount:
+          type: integer
+    AnnotationCreate:
+      type: object
+      required:
+      - tableName
+      - annotation
+      properties:
+        tableName:
+          type: string
+        columnName:
+          type: string
+          nullable: true
+        annotation:
+          type: string
+        dataType:
+          type: string
+        examples:
+          type: string
+    TestResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        latency:
+          type: number
+        message:
+          type: string
+        schemaIntrospected:
+          type: boolean
+          description: True when this test also introspected and cached the schema (first successful test on a connection with no schema).
+        tableCount:
+          type: integer
+          description: Number of tables found, when schemaIntrospected is true.
+        schemaError:
+          type: string
+          description: Present when the connection test succeeded but the automatic schema introspection failed.
+    Annotation:
+      type: object
+      properties:
+        id:
+          type: string
+        connectionId:
+          type: string
+        tableName:
+          type: string
+        columnName:
+          type: string
+          nullable: true
+        annotation:
+          type: string
+        dataType:
+          type: string
+          nullable: true
+        examples:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AnnotationUpdate:
+      type: object
+      properties:
+        annotation:
+          type: string
+        dataType:
+          type: string
+          nullable: true
+        examples:
+          type: string
+          nullable: true
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    Connection:
+      type: object
+      description: Sanitized connection metadata. Passwords, encrypted credentials, and platform secrets are never returned.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - POSTGRES
+          - MYSQL
+          - MARIADB
+          - MSSQL
+          - MONGODB
+          - SQLITE
+        host:
+          type: string
+        port:
+          type: integer
+          nullable: true
+        database:
+          type: string
+        username:
+          type: string
+        sslEnabled:
+          type: boolean
+        isActive:
+          type: boolean
+          description: False after 3 consecutive failed health checks (see lastError for why) or a failed manual test.
+        lastTestedAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastError:
+          type: string
+          nullable: true
+          description: Message from the most recent failed test/introspect/health-check. Null when the last attempt succeeded.
+        lastErrorDiagnosis:
+          $ref: '#/components/schemas/Diagnosis'
+          description: Structured diagnosis for lastError — check this instead of re-running a test to see why a connection is unhealthy.
+        schemaUpdatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    ConnectionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+          - POSTGRES
+          - MYSQL
+          - MARIADB
+          - MSSQL
+          - MONGODB
+          - SQLITE
+        host:
+          type: string
+        port:
+          type: integer
+        database:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+          description: Database password (write-only, never returned). `encryptedPassword` is accepted as an alias.
+        encryptedPassword:
+          type: string
+          description: Alias of `password`.
+        sslEnabled:
+          type: boolean
+          description: '`ssl` is accepted as an alias.'
+        isActive:
+          type: boolean
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    QueryRequest:
+      type: object
+      required:
+      - sql
+      properties:
+        sql:
+          type: string
+          description: SQL query to execute
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    AutoAnnotationRequest:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: Specific table names to annotate. Omit to annotate all tables.
+    Diagnosis:
+      type: object
+      description: Structured failure diagnosis included in CONNECTION_FAILED / INTROSPECTION_FAILED error details.
+      properties:
+        stage:
+          type: string
+          description: 'Where it failed: RESOLVE, CONNECT, TLS, AUTH, READ_SCHEMA, ...'
+        fault:
+          type: string
+          description: 'Whose problem it is: user, server, third-party, us'
+        title:
+          type: string
+        explanation:
+          type: string
+        fixSteps:
+          type: array
+          items:
+            type: string
+        retryable:
+          type: boolean
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_

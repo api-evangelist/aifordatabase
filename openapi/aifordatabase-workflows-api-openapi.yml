@@ -1,0 +1,947 @@
+openapi: 3.2.0
+info:
+  title: AI for Database Workflows API
+  version: 1.0.0
+  description: API for AI agents to interact with databases through natural language, dashboards, workflows, and more.
+servers:
+- url: https://app.aifordatabase.com/api/v1
+security:
+- bearerAuth: []
+tags:
+- name: Workflows
+  description: Build and run scheduled or manual multi-step workflows
+paths:
+  /workflows:
+    get:
+      tags:
+      - Workflows
+      summary: List workflows
+      operationId: listWorkflows
+      description: List all workflows for the organization.
+      parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated workflows
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Workflow'
+    post:
+      tags:
+      - Workflows
+      summary: Create workflow
+      operationId: createWorkflow
+      description: Create an inactive workflow draft with query steps and optional email or webhook actions. Scheduled execution begins only after publishing by setting isActive to true.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowCreate'
+      responses:
+        '201':
+          description: Workflow created
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /workflows/{id}:
+    get:
+      tags:
+      - Workflows
+      summary: Get workflow
+      operationId: getWorkflow
+      description: Get a workflow with its steps and actions.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Workflow details
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Workflow'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Workflows
+      summary: Update workflow
+      operationId: updateWorkflow
+      description: Replace any draft fields, query steps, or delivery actions. Include expectedDraftRevision whenever the draft changes. Set isActive to true to validate and atomically publish an immutable production version, or false to stop scheduled runs.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowUpdate'
+      responses:
+        '200':
+          description: Workflow updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Draft revision conflict
+        '428':
+          description: expectedDraftRevision is required for draft changes
+    delete:
+      tags:
+      - Workflows
+      summary: Delete workflow
+      operationId: deleteWorkflow
+      description: Delete a workflow and its steps, actions, and run history.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Workflow deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/DeletedResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workflows/{id}/run:
+    post:
+      tags:
+      - Workflows
+      summary: Trigger workflow
+      operationId: triggerWorkflow
+      description: Run the current draft immediately, including its configured delivery actions. This has real external side effects.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '201':
+          description: Workflow run completed
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WorkflowRun'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /workflows/{id}/preview:
+    post:
+      tags:
+      - Workflows
+      summary: Preview workflow queries
+      operationId: previewWorkflow
+      description: Execute only the current draft's query steps and return raw rows, condition state, and whether actions would run. This never executes delivery actions, never creates a WorkflowRun, and does not persist the returned preview rows.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Query-only workflow preview
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WorkflowPreview'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: The preview could not be started because no active source connection is available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /workflows/{id}/actions/{order}/test:
+    post:
+      tags:
+      - Workflows
+      summary: Test one workflow action
+      operationId: testWorkflowAction
+      description: Execute one action from the current draft and return its sanitized delivery attempts. This sends a real external request and requires explicit confirmation.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - name: order
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - confirmDelivery
+              properties:
+                confirmDelivery:
+                  type: boolean
+                  const: true
+      responses:
+        '200':
+          description: Action test succeeded
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/WorkflowRun'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: The action test ran but delivery failed; error.details.run contains the run and attempts
+        '428':
+          description: confirmDelivery must be true
+  /workflows/{id}/runs:
+    get:
+      tags:
+      - Workflows
+      summary: Get run history
+      operationId: listWorkflowRuns
+      description: List execution history for a workflow, including sanitized per-attempt delivery status, HTTP status codes, retry details, and bounded responses.
+      parameters:
+      - $ref: '#/components/parameters/IdParam'
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Paginated workflow runs
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SuccessEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/WorkflowRun'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    WorkflowPreview:
+      type: object
+      description: Point-in-time execution of the current draft's query steps. No delivery actions run, no WorkflowRun is created, and these preview rows are not persisted.
+      properties:
+        workflowId:
+          type: string
+        draftRevision:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum:
+          - READY
+          - CONDITION_NOT_MET
+          - FAILED
+        wouldRunActions:
+          type: boolean
+        actionsConfigured:
+          type: integer
+        rowsLimitedTo:
+          type: integer
+          const: 100
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowPreviewStep'
+    WorkflowActionInput:
+      type: object
+      required:
+      - type
+      - config
+      properties:
+        type:
+          type: string
+          enum:
+          - EMAIL
+          - WEBHOOK
+        config:
+          oneOf:
+          - $ref: '#/components/schemas/WebhookActionConfig'
+          - type: object
+            description: Email action configuration
+          - type: string
+            description: JSON-encoded action configuration
+        order:
+          type: integer
+          minimum: 0
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    WorkflowPreviewStep:
+      type: object
+      properties:
+        stepId:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - SUCCESS
+          - FAILED
+        rowCount:
+          type: integer
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          maxItems: 100
+          description: Raw preview rows. At most 100 rows are returned per step.
+          items:
+            type: object
+        executionTimeMs:
+          type: integer
+        conditionMet:
+          type: boolean
+        error:
+          type: string
+    WorkflowStepInput:
+      type: object
+      required:
+      - query
+      properties:
+        name:
+          type: string
+        query:
+          type: string
+        stopIfEmpty:
+          type: boolean
+          default: false
+        order:
+          type: integer
+          minimum: 0
+        connectionId:
+          type: string
+          format: uuid
+          nullable: true
+    WorkflowUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        projectId:
+          type: string
+          nullable: true
+        triggerType:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+        triggerConfig:
+          oneOf:
+          - $ref: '#/components/schemas/ScheduleConfig'
+          - type: string
+            description: JSON-encoded schedule configuration
+        steps:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: Complete replacement for the draft query steps.
+          items:
+            $ref: '#/components/schemas/WorkflowStepInput'
+        actions:
+          type: array
+          maxItems: 10
+          description: Complete replacement for the draft delivery actions.
+          items:
+            $ref: '#/components/schemas/WorkflowActionInput'
+        expectedDraftRevision:
+          type: integer
+          minimum: 1
+          description: Required whenever a draft field, step, or action changes. Read the current draftRevision first; a stale revision returns HTTP 409.
+        acknowledgedWarnings:
+          type: array
+          items:
+            type: string
+          description: Exact warning strings returned by a prior publish attempt. Resubmit them to explicitly confirm publishing.
+        isActive:
+          type: boolean
+    Workflow:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        projectId:
+          type: string
+          nullable: true
+        triggerType:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+        triggerConfig:
+          type: string
+          description: JSON configuration for schedule triggers
+        isActive:
+          type: boolean
+        draftRevision:
+          type: integer
+          description: Monotonic revision of the editable draft
+        publishedVersion:
+          type: integer
+          nullable: true
+          description: Immutable version used by scheduled production runs
+        publishedDraftRevision:
+          type: integer
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        hasUnpublishedChanges:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowAction'
+    WorkflowActionAttempt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        runId:
+          type: string
+          format: uuid
+        actionId:
+          type: string
+          format: uuid
+          nullable: true
+        actionOrder:
+          type: integer
+        attempt:
+          type: integer
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - SUCCESS
+          - FAILED
+        method:
+          type: string
+        url:
+          type: string
+          description: Sanitized URL without query string or fragment.
+        requestBodyBytes:
+          type: integer
+        statusCode:
+          type: integer
+          nullable: true
+        durationMs:
+          type: integer
+          nullable: true
+        responseHeaders:
+          type: string
+          nullable: true
+          description: Bounded allowlisted response headers as JSON.
+        responseBody:
+          type: string
+          nullable: true
+          description: Bounded, credential-redacted response body.
+        error:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+    WorkflowRun:
+      type: object
+      properties:
+        id:
+          type: string
+        workflowId:
+          type: string
+        trigger:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+          - ACTION_TEST
+        status:
+          type: string
+          enum:
+          - PENDING
+          - RUNNING
+          - SUCCESS
+          - PARTIAL_SUCCESS
+          - CONDITION_NOT_MET
+          - FAILED
+          - TIMED_OUT
+        definitionVersion:
+          type: integer
+          nullable: true
+        scheduledFor:
+          type: string
+          format: date-time
+          nullable: true
+        stepResults:
+          type: string
+          nullable: true
+          description: JSON-encoded query results.
+        actionResults:
+          type: string
+          nullable: true
+          description: JSON-encoded delivery results.
+        durationMs:
+          type: integer
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        actionAttempts:
+          type: array
+          description: Sanitized outbound delivery attempts. Secret headers and request bodies are never persisted.
+          items:
+            $ref: '#/components/schemas/WorkflowActionAttempt'
+    WorkflowCreate:
+      type: object
+      required:
+      - name
+      - triggerType
+      - steps
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        projectId:
+          type: string
+        triggerType:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+        triggerConfig:
+          oneOf:
+          - $ref: '#/components/schemas/ScheduleConfig'
+          - type: string
+            description: JSON-encoded schedule configuration
+        steps:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: object
+            required:
+            - query
+            properties:
+              name:
+                type: string
+              query:
+                type: string
+              stopIfEmpty:
+                type: boolean
+                default: false
+              order:
+                type: integer
+              connectionId:
+                type: string
+                format: uuid
+                nullable: true
+        actions:
+          type: array
+          items:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                type: string
+                enum:
+                - EMAIL
+                - WEBHOOK
+              config:
+                oneOf:
+                - $ref: '#/components/schemas/WebhookActionConfig'
+                - type: string
+                  description: JSON-encoded action configuration
+              order:
+                type: integer
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ScheduleConfig:
+      oneOf:
+      - type: object
+        title: Every N minutes
+        required:
+        - preset
+        - minutes
+        properties:
+          preset:
+            type: string
+            const: EVERY_N_MINUTES
+          minutes:
+            type: integer
+            minimum: 5
+            maximum: 43200
+      - type: object
+        title: Hourly
+        required:
+        - preset
+        properties:
+          preset:
+            type: string
+            const: HOURLY
+      - type: object
+        title: Daily
+        required:
+        - preset
+        - hour
+        properties:
+          preset:
+            type: string
+            const: DAILY
+          hour:
+            type: integer
+            minimum: 0
+            maximum: 23
+          minute:
+            type: integer
+            minimum: 0
+            maximum: 59
+            default: 0
+      - type: object
+        title: Weekly
+        required:
+        - preset
+        - dayOfWeek
+        - hour
+        properties:
+          preset:
+            type: string
+            const: WEEKLY
+          dayOfWeek:
+            type: integer
+            minimum: 0
+            maximum: 6
+          hour:
+            type: integer
+            minimum: 0
+            maximum: 23
+          minute:
+            type: integer
+            minimum: 0
+            maximum: 59
+            default: 0
+      discriminator:
+        propertyName: preset
+    WebhookActionConfig:
+      type: object
+      required:
+      - version
+      - url
+      - method
+      - bodyMode
+      properties:
+        version:
+          type: integer
+          const: 2
+        url:
+          type: string
+          format: uri
+          description: Public HTTPS destination on port 443. Private and reserved networks are rejected.
+        method:
+          type: string
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+        credentialId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Encrypted, destination-bound workflow credential. Secret headers cannot be supplied inline.
+        headers:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            required:
+            - name
+            - value
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+        bodyMode:
+          type: string
+          enum:
+          - NONE
+          - JSON
+          - RAW
+          - FORM_URLENCODED
+        bodyTemplate:
+          type: string
+          description: Supports workflow/query variables such as {{query_1.row_count}} and {{query_1.rows}}. A bare rows placeholder preserves the native JSON array. Wrap it when the destination expects an object, for example Brevo POST /events/batch expects {"events":{{query_1.rows}}}.
+        contentType:
+          type: string
+        timeoutMs:
+          type: integer
+          minimum: 1000
+          maximum: 30000
+          default: 10000
+        retry:
+          type: object
+          properties:
+            maxAttempts:
+              type: integer
+              minimum: 1
+              maximum: 5
+              default: 3
+            baseDelayMs:
+              type: integer
+              minimum: 100
+              maximum: 30000
+              default: 500
+        successStatusCodes:
+          type: array
+          minItems: 1
+          maxItems: 20
+          uniqueItems: true
+          description: Optional exact HTTP statuses considered successful. When omitted, every 2xx status succeeds. For Brevo POST /events/batch use [202], so a partial 207 response is recorded as a failure.
+          items:
+            type: integer
+            minimum: 100
+            maximum: 599
+        critical:
+          type: boolean
+          default: true
+    WorkflowStep:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        query:
+          type: string
+        stopIfEmpty:
+          type: boolean
+        order:
+          type: integer
+        connectionId:
+          type: string
+          format: uuid
+          nullable: true
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    WorkflowAction:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        config:
+          type: string
+          description: Sanitized JSON. Encrypted credential values and legacy inline secrets are never returned.
+        order:
+          type: integer
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Platform API key starting with afd_
