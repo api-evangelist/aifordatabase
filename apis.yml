@@ -610,6 +610,8 @@ apis:
   - type: LLMsTxt
     url: llms/aifordatabase-llms.txt
 common:
+- type: Website
+  url: https://www.aifordatabase.com/
 - type: Overlay
   url: overlays/aifordatabase-openapi-overlay.yaml
 - type: MCPServer
