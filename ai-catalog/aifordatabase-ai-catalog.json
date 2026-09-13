@@ -1,0 +1,100 @@
+{
+  "specVersion": "0.91",
+  "@context": "https://agenticresourcediscovery.org/context/v1",
+  "entries": [
+    {
+      "identifier": "urn:air:aifordatabase.com:api:rest",
+      "displayName": "AI for Database REST API",
+      "type": "application/vnd.oai.openapi+json",
+      "url": "https://app.aifordatabase.com/api/v1/openapi.json",
+      "representativeQueries": [
+        "query a connected database with natural language",
+        "automate a database workflow"
+      ],
+      "trustManifest": {
+        "identity": {
+          "id": "did:web:aifordatabase.com",
+          "domain": "aifordatabase.com",
+          "verificationMethod": "did:web:aifordatabase.com#catalog-signing-key"
+        },
+        "trustSchema": {
+          "governanceUri": "https://www.aifordatabase.com/.well-known/ard-signature-profile.json",
+          "verificationMethods": [
+            "JWS-Ed25519-did-web"
+          ]
+        },
+        "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6YWlmb3JkYXRhYmFzZS5jb20jY2F0YWxvZy1zaWduaW5nLWtleSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6d2ViOmFpZm9yZGF0YWJhc2UuY29tIiwiZW50cnkiOnsiaWRlbnRpZmllciI6InVybjphaXI6YWlmb3JkYXRhYmFzZS5jb206YXBpOnJlc3QiLCJkaXNwbGF5TmFtZSI6IkFJIGZvciBEYXRhYmFzZSBSRVNUIEFQSSIsInR5cGUiOiJhcHBsaWNhdGlvbi92bmQub2FpLm9wZW5hcGkranNvbiIsInVybCI6Imh0dHBzOi8vYXBwLmFpZm9yZGF0YWJhc2UuY29tL2FwaS92MS9vcGVuYXBpLmpzb24iLCJyZXByZXNlbnRhdGl2ZVF1ZXJpZXMiOlsicXVlcnkgYSBjb25uZWN0ZWQgZGF0YWJhc2Ugd2l0aCBuYXR1cmFsIGxhbmd1YWdlIiwiYXV0b21hdGUgYSBkYXRhYmFzZSB3b3JrZmxvdyJdfX0.eBXpjKjHAuzjKoD2nt-h859ImsGzcIn53bpQTQUKjtLcoNKpCmdx9hFrycx-h4KPCCiSaeSwz_fot8zY8Lh4Cg"
+      }
+    },
+    {
+      "identifier": "urn:air:aifordatabase.com:reference:agents",
+      "displayName": "AI for Database agent reference",
+      "type": "text/html",
+      "url": "https://aifordatabase.com/for-agents/",
+      "representativeQueries": [
+        "how do I integrate AI for Database as an agent"
+      ],
+      "trustManifest": {
+        "identity": {
+          "id": "did:web:aifordatabase.com",
+          "domain": "aifordatabase.com",
+          "verificationMethod": "did:web:aifordatabase.com#catalog-signing-key"
+        },
+        "trustSchema": {
+          "governanceUri": "https://www.aifordatabase.com/.well-known/ard-signature-profile.json",
+          "verificationMethods": [
+            "JWS-Ed25519-did-web"
+          ]
+        },
+        "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6YWlmb3JkYXRhYmFzZS5jb20jY2F0YWxvZy1zaWduaW5nLWtleSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6d2ViOmFpZm9yZGF0YWJhc2UuY29tIiwiZW50cnkiOnsiaWRlbnRpZmllciI6InVybjphaXI6YWlmb3JkYXRhYmFzZS5jb206cmVmZXJlbmNlOmFnZW50cyIsImRpc3BsYXlOYW1lIjoiQUkgZm9yIERhdGFiYXNlIGFnZW50IHJlZmVyZW5jZSIsInR5cGUiOiJ0ZXh0L2h0bWwiLCJ1cmwiOiJodHRwczovL2FpZm9yZGF0YWJhc2UuY29tL2Zvci1hZ2VudHMvIiwicmVwcmVzZW50YXRpdmVRdWVyaWVzIjpbImhvdyBkbyBJIGludGVncmF0ZSBBSSBmb3IgRGF0YWJhc2UgYXMgYW4gYWdlbnQiXX19.z2sogS74KbEjonKa0OQo_DCAvzV-d4aZ2ftIaEO7PPPJIuYXMf6LYtuonk2kEOUSBVGoCC_qwXVyVPvX_V7pBg"
+      }
+    },
+    {
+      "identifier": "urn:air:aifordatabase.com:reference:llms",
+      "displayName": "AI for Database machine readable reference",
+      "type": "text/plain",
+      "url": "https://aifordatabase.com/llms.txt",
+      "representativeQueries": [
+        "what can the AI for Database API do"
+      ],
+      "trustManifest": {
+        "identity": {
+          "id": "did:web:aifordatabase.com",
+          "domain": "aifordatabase.com",
+          "verificationMethod": "did:web:aifordatabase.com#catalog-signing-key"
+        },
+        "trustSchema": {
+          "governanceUri": "https://www.aifordatabase.com/.well-known/ard-signature-profile.json",
+          "verificationMethods": [
+            "JWS-Ed25519-did-web"
+          ]
+        },
+        "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6YWlmb3JkYXRhYmFzZS5jb20jY2F0YWxvZy1zaWduaW5nLWtleSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6d2ViOmFpZm9yZGF0YWJhc2UuY29tIiwiZW50cnkiOnsiaWRlbnRpZmllciI6InVybjphaXI6YWlmb3JkYXRhYmFzZS5jb206cmVmZXJlbmNlOmxsbXMiLCJkaXNwbGF5TmFtZSI6IkFJIGZvciBEYXRhYmFzZSBtYWNoaW5lIHJlYWRhYmxlIHJlZmVyZW5jZSIsInR5cGUiOiJ0ZXh0L3BsYWluIiwidXJsIjoiaHR0cHM6Ly9haWZvcmRhdGFiYXNlLmNvbS9sbG1zLnR4dCIsInJlcHJlc2VudGF0aXZlUXVlcmllcyI6WyJ3aGF0IGNhbiB0aGUgQUkgZm9yIERhdGFiYXNlIEFQSSBkbyJdfX0.JXU_DicWonT0D4bgV4TChvvkAH1hsls4o4idRpNuDYq169DUDH7bo9gngxr0pEmM0jePzlIYikBv5N62UhCjCw"
+      }
+    },
+    {
+      "identifier": "urn:air:aifordatabase.com:reference:docs-mcp",
+      "displayName": "AI for Database documentation MCP",
+      "type": "application/mcp-server-card+json",
+      "url": "https://www.aifordatabase.com/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "search AI for Database documentation",
+        "read API authentication documentation"
+      ],
+      "trustManifest": {
+        "identity": {
+          "id": "did:web:aifordatabase.com",
+          "domain": "aifordatabase.com",
+          "verificationMethod": "did:web:aifordatabase.com#catalog-signing-key"
+        },
+        "trustSchema": {
+          "governanceUri": "https://www.aifordatabase.com/.well-known/ard-signature-profile.json",
+          "verificationMethods": [
+            "JWS-Ed25519-did-web"
+          ]
+        },
+        "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6YWlmb3JkYXRhYmFzZS5jb20jY2F0YWxvZy1zaWduaW5nLWtleSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkaWQ6d2ViOmFpZm9yZGF0YWJhc2UuY29tIiwiZW50cnkiOnsiaWRlbnRpZmllciI6InVybjphaXI6YWlmb3JkYXRhYmFzZS5jb206cmVmZXJlbmNlOmRvY3MtbWNwIiwiZGlzcGxheU5hbWUiOiJBSSBmb3IgRGF0YWJhc2UgZG9jdW1lbnRhdGlvbiBNQ1AiLCJ0eXBlIjoiYXBwbGljYXRpb24vbWNwLXNlcnZlci1jYXJkK2pzb24iLCJ1cmwiOiJodHRwczovL3d3dy5haWZvcmRhdGFiYXNlLmNvbS8ud2VsbC1rbm93bi9tY3Avc2VydmVyLWNhcmQuanNvbiIsInJlcHJlc2VudGF0aXZlUXVlcmllcyI6WyJzZWFyY2ggQUkgZm9yIERhdGFiYXNlIGRvY3VtZW50YXRpb24iLCJyZWFkIEFQSSBhdXRoZW50aWNhdGlvbiBkb2N1bWVudGF0aW9uIl19fQ.xQWbtsTHE3ZqKRnV0EE0lFrJ-jl50Q00BmitYohCnWiLq0uNex0RaPenz6a_-3l9-MRRxPx74b-jGam9TdJaAg"
+      }
+    }
+  ]
+}
