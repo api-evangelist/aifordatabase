@@ -309,74 +309,30 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   schemas:
-    ApprovalResult:
-      type: object
-      properties:
-        id:
-          type: string
-        status:
-          type: string
-          enum:
-          - APPROVED
-          - REJECTED
-        reviewedBy:
-          type: string
-        reviewNote:
-          type: string
-          nullable: true
-        result:
-          $ref: '#/components/schemas/QueryResult'
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    ApproveRejectRequest:
-      type: object
-      properties:
-        note:
-          type: string
-          description: Optional reviewer note
-    QuerySubmitRequest:
-      type: object
-      required:
-      - connectionId
-      - query
-      properties:
-        connectionId:
-          type: string
-        query:
-          type: string
-        context:
-          type: string
-          description: Optional description of why this query needs to run
-    QueryResult:
-      type: object
-      description: Raw database result returned directly to the authenticated caller.
-      properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
-          type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
     ApprovalRule:
       type: object
       properties:
@@ -401,6 +357,154 @@ components:
         updatedAt:
           type: string
           format: date-time
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    ApprovalRuleCreate:
+      type: object
+      required:
+      - approvers
+      properties:
+        connectionId:
+          type: string
+        scope:
+          type: string
+          default: all
+        approvers:
+          type: array
+          items:
+            type: string
+          description: User IDs of authorized approvers
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    ApprovalRuleUpdate:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          nullable: true
+        scope:
+          type: string
+        approvers:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+    QuerySubmitRequest:
+      type: object
+      required:
+      - connectionId
+      - query
+      properties:
+        connectionId:
+          type: string
+        query:
+          type: string
+        context:
+          type: string
+          description: Optional description of why this query needs to run
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApprovalResult:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+          - APPROVED
+          - REJECTED
+        reviewedBy:
+          type: string
+        reviewNote:
+          type: string
+          nullable: true
+        result:
+          $ref: '#/components/schemas/QueryResult'
     PendingQuery:
       type: object
       properties:
@@ -441,93 +545,12 @@ components:
         createdAt:
           type: string
           format: date-time
-    Pagination:
+    ApproveRejectRequest:
       type: object
       properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
-      required:
-      - total
-      - page
-      - pageSize
-      - totalPages
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiError:
-      type: object
-      properties:
-        code:
+        note:
           type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    ApprovalRuleCreate:
-      type: object
-      required:
-      - approvers
-      properties:
-        connectionId:
-          type: string
-        scope:
-          type: string
-          default: all
-        approvers:
-          type: array
-          items:
-            type: string
-          description: User IDs of authorized approvers
-    ApprovalRuleUpdate:
-      type: object
-      properties:
-        connectionId:
-          type: string
-          nullable: true
-        scope:
-          type: string
-        approvers:
-          type: array
-          items:
-            type: string
-        isActive:
-          type: boolean
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
+          description: Optional reviewer note
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -547,29 +570,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-  parameters:
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

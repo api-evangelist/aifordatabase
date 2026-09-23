@@ -1,0 +1,44 @@
+{
+  "provider": "aifordatabase",
+  "sources": [
+    "_original/aifordatabase-openapi.json"
+  ],
+  "outputs": [
+    "aifordatabase-chat-api-openapi.yml",
+    "aifordatabase-connections-api-openapi.yml",
+    "aifordatabase-conversations-api-openapi.yml",
+    "aifordatabase-dashboards-api-openapi.yml",
+    "aifordatabase-keys-api-openapi.yml",
+    "aifordatabase-metrics-api-openapi.yml",
+    "aifordatabase-query-approval-api-openapi.yml",
+    "aifordatabase-saved-queries-api-openapi.yml",
+    "aifordatabase-usage-api-openapi.yml",
+    "aifordatabase-webhooks-api-openapi.yml",
+    "aifordatabase-workflow-credentials-api-openapi.yml",
+    "aifordatabase-workflows-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "1 archived document(s) dropped as subsets of other archived documents",
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "aifordatabase-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "_original/aifordatabase-openapi.yml: archived document superseded by a larger archived document",
+    "aifordatabase-chat-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-connections-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-conversations-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-dashboards-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-keys-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-metrics-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-query-approval-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-saved-queries-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-usage-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-workflow-credentials-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "aifordatabase-workflows-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}

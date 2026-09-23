@@ -56,6 +56,54 @@ paths:
                       $ref: '#/components/schemas/Budget'
 components:
   schemas:
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    UsageRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        userId:
+          type: string
+        model:
+          type: string
+        promptTokens:
+          type: integer
+        completionTokens:
+          type: integer
+        costCents:
+          type: number
+        feature:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     Budget:
       type: object
       properties:
@@ -79,32 +127,6 @@ components:
           type: string
           format: date-time
           nullable: true
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     Pagination:
       type: object
       properties:
@@ -121,28 +143,6 @@ components:
       - page
       - pageSize
       - totalPages
-    UsageRecord:
-      type: object
-      properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        userId:
-          type: string
-        model:
-          type: string
-        promptTokens:
-          type: integer
-        completionTokens:
-          type: integer
-        costCents:
-          type: number
-        feature:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
   parameters:
     PageSizeParam:
       name: pageSize

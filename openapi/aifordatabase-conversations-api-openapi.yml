@@ -167,36 +167,21 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
-  parameters:
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   schemas:
-    DeletedResponse:
+    ApiMeta:
       type: object
       properties:
-        deleted:
-          type: boolean
-          example: true
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
     Conversation:
       type: object
       properties:
@@ -217,39 +202,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ConversationUpdate:
-      type: object
-      required:
-      - title
-      properties:
-        title:
-          type: string
     ApiError:
       type: object
       properties:
@@ -261,6 +213,19 @@ components:
       required:
       - code
       - message
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     Message:
       type: object
       properties:
@@ -293,6 +258,38 @@ components:
         createdAt:
           type: string
           format: date-time
+    ConversationCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        connectionId:
+          type: string
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    ConversationUpdate:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
     Pagination:
       type: object
       properties:
@@ -309,26 +306,6 @@ components:
       - page
       - pageSize
       - totalPages
-    ConversationCreate:
-      type: object
-      properties:
-        title:
-          type: string
-        connectionId:
-          type: string
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -342,6 +319,29 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

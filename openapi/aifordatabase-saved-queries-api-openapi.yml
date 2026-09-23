@@ -195,36 +195,92 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
-  parameters:
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
   schemas:
-    DeletedResponse:
+    ApiMeta:
       type: object
       properties:
-        deleted:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    SavedQueryCreate:
+      type: object
+      required:
+      - name
+      - query
+      - connectionId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of { name, type, required }
+        tags:
+          type: string
+        isPublic:
           type: boolean
-          example: true
+          default: true
+    SavedQueryRunRequest:
+      type: object
+      properties:
+        params:
+          type: object
+          additionalProperties: true
+          description: Key-value pairs for query placeholders
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     SavedQuery:
       type: object
       properties:
@@ -254,43 +310,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    SavedQueryCreate:
-      type: object
-      required:
-      - name
-      - query
-      - connectionId
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-          description: JSON array of { name, type, required }
-        tags:
-          type: string
-        isPublic:
-          type: boolean
-          default: true
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
     SuccessEnvelope:
       type: object
       properties:
@@ -303,41 +322,6 @@ components:
       - data
       - error
       - meta
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    QueryResult:
-      type: object
-      description: Raw database result returned directly to the authenticated caller.
-      properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
-          type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
-    SavedQueryRunRequest:
-      type: object
-      properties:
-        params:
-          type: object
-          additionalProperties: true
-          description: Key-value pairs for query placeholders
     SavedQueryUpdate:
       type: object
       properties:
@@ -355,6 +339,12 @@ components:
           type: string
         isPublic:
           type: boolean
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
     Pagination:
       type: object
       properties:
@@ -371,19 +361,6 @@ components:
       - page
       - pageSize
       - totalPages
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -397,6 +374,29 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

@@ -270,97 +270,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    WorkflowPreview:
-      type: object
-      description: Point-in-time execution of the current draft's query steps. No delivery actions run, no WorkflowRun is created, and these preview rows are not persisted.
-      properties:
-        workflowId:
-          type: string
-        draftRevision:
-          type: integer
-          nullable: true
-        status:
-          type: string
-          enum:
-          - READY
-          - CONDITION_NOT_MET
-          - FAILED
-        wouldRunActions:
-          type: boolean
-        actionsConfigured:
-          type: integer
-        rowsLimitedTo:
-          type: integer
-          const: 100
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/WorkflowPreviewStep'
-    WorkflowActionInput:
-      type: object
-      required:
-      - type
-      - config
-      properties:
-        type:
-          type: string
-          enum:
-          - EMAIL
-          - WEBHOOK
-        config:
-          oneOf:
-          - $ref: '#/components/schemas/WebhookActionConfig'
-          - type: object
-            description: Email action configuration
-          - type: string
-            description: JSON-encoded action configuration
-        order:
-          type: integer
-          minimum: 0
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    WorkflowPreviewStep:
-      type: object
-      properties:
-        stepId:
-          type: string
-        name:
-          type: string
-        status:
-          type: string
-          enum:
-          - SUCCESS
-          - FAILED
-        rowCount:
-          type: integer
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          maxItems: 100
-          description: Raw preview rows. At most 100 rows are returned per step.
-          items:
-            type: object
-        executionTimeMs:
-          type: integer
-        conditionMet:
-          type: boolean
-        error:
-          type: string
     WorkflowStepInput:
       type: object
       required:
@@ -380,220 +289,6 @@ components:
           type: string
           format: uuid
           nullable: true
-    WorkflowUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-          nullable: true
-        projectId:
-          type: string
-          nullable: true
-        triggerType:
-          type: string
-          enum:
-          - MANUAL
-          - SCHEDULE
-        triggerConfig:
-          oneOf:
-          - $ref: '#/components/schemas/ScheduleConfig'
-          - type: string
-            description: JSON-encoded schedule configuration
-        steps:
-          type: array
-          minItems: 1
-          maxItems: 5
-          description: Complete replacement for the draft query steps.
-          items:
-            $ref: '#/components/schemas/WorkflowStepInput'
-        actions:
-          type: array
-          maxItems: 10
-          description: Complete replacement for the draft delivery actions.
-          items:
-            $ref: '#/components/schemas/WorkflowActionInput'
-        expectedDraftRevision:
-          type: integer
-          minimum: 1
-          description: Required whenever a draft field, step, or action changes. Read the current draftRevision first; a stale revision returns HTTP 409.
-        acknowledgedWarnings:
-          type: array
-          items:
-            type: string
-          description: Exact warning strings returned by a prior publish attempt. Resubmit them to explicitly confirm publishing.
-        isActive:
-          type: boolean
-    Workflow:
-      type: object
-      properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-          nullable: true
-        projectId:
-          type: string
-          nullable: true
-        triggerType:
-          type: string
-          enum:
-          - MANUAL
-          - SCHEDULE
-        triggerConfig:
-          type: string
-          description: JSON configuration for schedule triggers
-        isActive:
-          type: boolean
-        draftRevision:
-          type: integer
-          description: Monotonic revision of the editable draft
-        publishedVersion:
-          type: integer
-          nullable: true
-          description: Immutable version used by scheduled production runs
-        publishedDraftRevision:
-          type: integer
-          nullable: true
-        publishedAt:
-          type: string
-          format: date-time
-          nullable: true
-        hasUnpublishedChanges:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/WorkflowStep'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/WorkflowAction'
-    WorkflowActionAttempt:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        runId:
-          type: string
-          format: uuid
-        actionId:
-          type: string
-          format: uuid
-          nullable: true
-        actionOrder:
-          type: integer
-        attempt:
-          type: integer
-        status:
-          type: string
-          enum:
-          - RUNNING
-          - SUCCESS
-          - FAILED
-        method:
-          type: string
-        url:
-          type: string
-          description: Sanitized URL without query string or fragment.
-        requestBodyBytes:
-          type: integer
-        statusCode:
-          type: integer
-          nullable: true
-        durationMs:
-          type: integer
-          nullable: true
-        responseHeaders:
-          type: string
-          nullable: true
-          description: Bounded allowlisted response headers as JSON.
-        responseBody:
-          type: string
-          nullable: true
-          description: Bounded, credential-redacted response body.
-        error:
-          type: string
-          nullable: true
-        startedAt:
-          type: string
-          format: date-time
-        completedAt:
-          type: string
-          format: date-time
-          nullable: true
-    WorkflowRun:
-      type: object
-      properties:
-        id:
-          type: string
-        workflowId:
-          type: string
-        trigger:
-          type: string
-          enum:
-          - MANUAL
-          - SCHEDULE
-          - ACTION_TEST
-        status:
-          type: string
-          enum:
-          - PENDING
-          - RUNNING
-          - SUCCESS
-          - PARTIAL_SUCCESS
-          - CONDITION_NOT_MET
-          - FAILED
-          - TIMED_OUT
-        definitionVersion:
-          type: integer
-          nullable: true
-        scheduledFor:
-          type: string
-          format: date-time
-          nullable: true
-        stepResults:
-          type: string
-          nullable: true
-          description: JSON-encoded query results.
-        actionResults:
-          type: string
-          nullable: true
-          description: JSON-encoded delivery results.
-        durationMs:
-          type: integer
-          nullable: true
-        error:
-          type: string
-          nullable: true
-        startedAt:
-          type: string
-          format: date-time
-        completedAt:
-          type: string
-          format: date-time
-          nullable: true
-        actionAttempts:
-          type: array
-          description: Sanitized outbound delivery attempts. Secret headers and request bodies are never persisted.
-          items:
-            $ref: '#/components/schemas/WorkflowActionAttempt'
     WorkflowCreate:
       type: object
       required:
@@ -660,88 +355,18 @@ components:
                   description: JSON-encoded action configuration
               order:
                 type: integer
-    Pagination:
+    SuccessEnvelope:
       type: object
       properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
       required:
-      - total
-      - page
-      - pageSize
-      - totalPages
-    ScheduleConfig:
-      oneOf:
-      - type: object
-        title: Every N minutes
-        required:
-        - preset
-        - minutes
-        properties:
-          preset:
-            type: string
-            const: EVERY_N_MINUTES
-          minutes:
-            type: integer
-            minimum: 5
-            maximum: 43200
-      - type: object
-        title: Hourly
-        required:
-        - preset
-        properties:
-          preset:
-            type: string
-            const: HOURLY
-      - type: object
-        title: Daily
-        required:
-        - preset
-        - hour
-        properties:
-          preset:
-            type: string
-            const: DAILY
-          hour:
-            type: integer
-            minimum: 0
-            maximum: 23
-          minute:
-            type: integer
-            minimum: 0
-            maximum: 59
-            default: 0
-      - type: object
-        title: Weekly
-        required:
-        - preset
-        - dayOfWeek
-        - hour
-        properties:
-          preset:
-            type: string
-            const: WEEKLY
-          dayOfWeek:
-            type: integer
-            minimum: 0
-            maximum: 6
-          hour:
-            type: integer
-            minimum: 0
-            maximum: 23
-          minute:
-            type: integer
-            minimum: 0
-            maximum: 59
-            default: 0
-      discriminator:
-        propertyName: preset
+      - data
+      - error
+      - meta
     WebhookActionConfig:
       type: object
       required:
@@ -826,6 +451,357 @@ components:
         critical:
           type: boolean
           default: true
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    WorkflowUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        projectId:
+          type: string
+          nullable: true
+        triggerType:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+        triggerConfig:
+          oneOf:
+          - $ref: '#/components/schemas/ScheduleConfig'
+          - type: string
+            description: JSON-encoded schedule configuration
+        steps:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: Complete replacement for the draft query steps.
+          items:
+            $ref: '#/components/schemas/WorkflowStepInput'
+        actions:
+          type: array
+          maxItems: 10
+          description: Complete replacement for the draft delivery actions.
+          items:
+            $ref: '#/components/schemas/WorkflowActionInput'
+        expectedDraftRevision:
+          type: integer
+          minimum: 1
+          description: Required whenever a draft field, step, or action changes. Read the current draftRevision first; a stale revision returns HTTP 409.
+        acknowledgedWarnings:
+          type: array
+          items:
+            type: string
+          description: Exact warning strings returned by a prior publish attempt. Resubmit them to explicitly confirm publishing.
+        isActive:
+          type: boolean
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    ScheduleConfig:
+      oneOf:
+      - type: object
+        title: Every N minutes
+        required:
+        - preset
+        - minutes
+        properties:
+          preset:
+            type: string
+            const: EVERY_N_MINUTES
+          minutes:
+            type: integer
+            minimum: 5
+            maximum: 43200
+      - type: object
+        title: Hourly
+        required:
+        - preset
+        properties:
+          preset:
+            type: string
+            const: HOURLY
+      - type: object
+        title: Daily
+        required:
+        - preset
+        - hour
+        properties:
+          preset:
+            type: string
+            const: DAILY
+          hour:
+            type: integer
+            minimum: 0
+            maximum: 23
+          minute:
+            type: integer
+            minimum: 0
+            maximum: 59
+            default: 0
+      - type: object
+        title: Weekly
+        required:
+        - preset
+        - dayOfWeek
+        - hour
+        properties:
+          preset:
+            type: string
+            const: WEEKLY
+          dayOfWeek:
+            type: integer
+            minimum: 0
+            maximum: 6
+          hour:
+            type: integer
+            minimum: 0
+            maximum: 23
+          minute:
+            type: integer
+            minimum: 0
+            maximum: 59
+            default: 0
+      discriminator:
+        propertyName: preset
+    WorkflowRun:
+      type: object
+      properties:
+        id:
+          type: string
+        workflowId:
+          type: string
+        trigger:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+          - ACTION_TEST
+        status:
+          type: string
+          enum:
+          - PENDING
+          - RUNNING
+          - SUCCESS
+          - PARTIAL_SUCCESS
+          - CONDITION_NOT_MET
+          - FAILED
+          - TIMED_OUT
+        definitionVersion:
+          type: integer
+          nullable: true
+        scheduledFor:
+          type: string
+          format: date-time
+          nullable: true
+        stepResults:
+          type: string
+          nullable: true
+          description: JSON-encoded query results.
+        actionResults:
+          type: string
+          nullable: true
+          description: JSON-encoded delivery results.
+        durationMs:
+          type: integer
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        actionAttempts:
+          type: array
+          description: Sanitized outbound delivery attempts. Secret headers and request bodies are never persisted.
+          items:
+            $ref: '#/components/schemas/WorkflowActionAttempt'
+    WorkflowAction:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        config:
+          type: string
+          description: Sanitized JSON. Encrypted credential values and legacy inline secrets are never returned.
+        order:
+          type: integer
+    WorkflowPreview:
+      type: object
+      description: Point-in-time execution of the current draft's query steps. No delivery actions run, no WorkflowRun is created, and these preview rows are not persisted.
+      properties:
+        workflowId:
+          type: string
+        draftRevision:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum:
+          - READY
+          - CONDITION_NOT_MET
+          - FAILED
+        wouldRunActions:
+          type: boolean
+        actionsConfigured:
+          type: integer
+        rowsLimitedTo:
+          type: integer
+          const: 100
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowPreviewStep'
+    WorkflowPreviewStep:
+      type: object
+      properties:
+        stepId:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - SUCCESS
+          - FAILED
+        rowCount:
+          type: integer
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          maxItems: 100
+          description: Raw preview rows. At most 100 rows are returned per step.
+          items:
+            type: object
+        executionTimeMs:
+          type: integer
+        conditionMet:
+          type: boolean
+        error:
+          type: string
+    WorkflowActionAttempt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        runId:
+          type: string
+          format: uuid
+        actionId:
+          type: string
+          format: uuid
+          nullable: true
+        actionOrder:
+          type: integer
+        attempt:
+          type: integer
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - SUCCESS
+          - FAILED
+        method:
+          type: string
+        url:
+          type: string
+          description: Sanitized URL without query string or fragment.
+        requestBodyBytes:
+          type: integer
+        statusCode:
+          type: integer
+          nullable: true
+        durationMs:
+          type: integer
+          nullable: true
+        responseHeaders:
+          type: string
+          nullable: true
+          description: Bounded allowlisted response headers as JSON.
+        responseBody:
+          type: string
+          nullable: true
+          description: Bounded, credential-redacted response body.
+        error:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     WorkflowStep:
       type: object
       properties:
@@ -843,60 +819,107 @@ components:
           type: string
           format: uuid
           nullable: true
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    WorkflowAction:
+    Workflow:
       type: object
       properties:
         id:
           type: string
+        orgId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        projectId:
+          type: string
+          nullable: true
+        triggerType:
+          type: string
+          enum:
+          - MANUAL
+          - SCHEDULE
+        triggerConfig:
+          type: string
+          description: JSON configuration for schedule triggers
+        isActive:
+          type: boolean
+        draftRevision:
+          type: integer
+          description: Monotonic revision of the editable draft
+        publishedVersion:
+          type: integer
+          nullable: true
+          description: Immutable version used by scheduled production runs
+        publishedDraftRevision:
+          type: integer
+          nullable: true
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        hasUnpublishedChanges:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowStep'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowAction'
+    WorkflowActionInput:
+      type: object
+      required:
+      - type
+      - config
+      properties:
         type:
           type: string
+          enum:
+          - EMAIL
+          - WEBHOOK
         config:
-          type: string
-          description: Sanitized JSON. Encrypted credential values and legacy inline secrets are never returned.
+          oneOf:
+          - $ref: '#/components/schemas/WebhookActionConfig'
+          - type: object
+            description: Email action configuration
+          - type: string
+            description: JSON-encoded action configuration
         order:
           type: integer
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
+          minimum: 0
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -916,29 +939,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-  parameters:
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

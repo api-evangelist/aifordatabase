@@ -191,43 +191,6 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
   schemas:
-    MetricValue:
-      type: object
-      properties:
-        value:
-          description: The computed metric value
-        unit:
-          type: string
-          nullable: true
-        asOf:
-          type: string
-          format: date-time
-        executionTime:
-          type: number
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    MetricCreate:
-      type: object
-      required:
-      - name
-      - formula
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        formula:
-          type: string
-        connectionId:
-          type: string
-        unit:
-          type: string
-        dimensions:
-          type: string
     ApiMeta:
       type: object
       properties:
@@ -242,12 +205,39 @@ components:
       required:
       - requestId
       - timestamp
-    SuccessEnvelope:
+    MetricUpdate:
       type: object
       properties:
-        data: {}
-        error:
+        name:
+          type: string
+        description:
+          type: string
+        formula:
+          type: string
+        connectionId:
+          type: string
+        unit:
+          type: string
+        dimensions:
+          type: string
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
           type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
         meta:
           $ref: '#/components/schemas/ApiMeta'
       required:
@@ -283,8 +273,36 @@ components:
         updatedAt:
           type: string
           format: date-time
-    MetricUpdate:
+    SuccessEnvelope:
       type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    MetricValue:
+      type: object
+      properties:
+        value:
+          description: The computed metric value
+        unit:
+          type: string
+          nullable: true
+        asOf:
+          type: string
+          format: date-time
+        executionTime:
+          type: number
+    MetricCreate:
+      type: object
+      required:
+      - name
+      - formula
       properties:
         name:
           type: string
@@ -298,17 +316,12 @@ components:
           type: string
         dimensions:
           type: string
-    ApiError:
+    DeletedResponse:
       type: object
       properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
+        deleted:
+          type: boolean
+          example: true
     Pagination:
       type: object
       properties:
@@ -325,19 +338,19 @@ components:
       - page
       - pageSize
       - totalPages
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
+  responses:
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
   parameters:
     PageSizeParam:
       name: pageSize
@@ -361,19 +374,6 @@ components:
       schema:
         type: string
       description: Resource ID
-  responses:
-    BadRequest:
-      description: Validation error or bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
   securitySchemes:
     bearerAuth:
       type: http
