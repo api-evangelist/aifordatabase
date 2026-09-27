@@ -93,20 +93,80 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    ApiMeta:
+    ApiKeyCreated:
       type: object
       properties:
-        requestId:
+        id:
           type: string
-          format: uuid
-        timestamp:
+        name:
+          type: string
+        keyPrefix:
+          type: string
+        scopes:
+          type: string
+        expiresAt:
           type: string
           format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        key:
+          type: string
+          description: Full API key — only returned at creation time
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
       required:
-      - requestId
-      - timestamp
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    ApiKeyCreate:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+          default:
+          - '*'
+          description: Permission scopes — use '*' for all
+        expiresAt:
+          type: string
+          format: date-time
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     ApiKey:
       type: object
       properties:
@@ -129,80 +189,6 @@ components:
           type: string
           format: date-time
           nullable: true
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiKeyCreated:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        keyPrefix:
-          type: string
-        scopes:
-          type: string
-        expiresAt:
-          type: string
-          format: date-time
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-        key:
-          type: string
-          description: Full API key — only returned at creation time
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiKeyCreate:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          type: string
-        scopes:
-          type: array
-          items:
-            type: string
-          default:
-          - '*'
-          description: Permission scopes — use '*' for all
-        expiresAt:
-          type: string
-          format: date-time
     Pagination:
       type: object
       properties:
@@ -219,6 +205,28 @@ components:
       - page
       - pageSize
       - totalPages
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -238,14 +246,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-  parameters:
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

@@ -187,77 +187,43 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
   schemas:
-    ApiMeta:
+    ErrorEnvelope:
       type: object
       properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    WebhookTestResult:
-      type: object
-      properties:
-        delivery:
-          $ref: '#/components/schemas/WebhookDelivery'
-        success:
-          type: boolean
+        data:
+          type: 'null'
         error:
-          type: string
-          nullable: true
-    WebhookEndpointCreate:
-      type: object
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
       required:
-      - url
-      - events
-      properties:
-        url:
-          type: string
-          format: uri
-        events:
-          type: array
-          items:
-            type: string
-          description: Event types to subscribe to, or ['*'] for all
-        isActive:
-          type: boolean
-          default: true
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    WebhookDelivery:
-      type: object
-      properties:
-        id:
-          type: string
-        endpointId:
-          type: string
-        event:
-          type: string
-        payload:
-          type: string
-        statusCode:
-          type: integer
-          nullable: true
-        attempts:
-          type: integer
-        deliveredAt:
-          type: string
-          format: date-time
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
+      - data
+      - error
+      - meta
     ApiError:
       type: object
       properties:
@@ -269,6 +235,24 @@ components:
       required:
       - code
       - message
+    WebhookEndpointUpdate:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
     WebhookEndpoint:
       type: object
       properties:
@@ -294,19 +278,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     SuccessEnvelope:
       type: object
       properties:
@@ -319,8 +290,11 @@ components:
       - data
       - error
       - meta
-    WebhookEndpointUpdate:
+    WebhookEndpointCreate:
       type: object
+      required:
+      - url
+      - events
       properties:
         url:
           type: string
@@ -329,8 +303,10 @@ components:
           type: array
           items:
             type: string
+          description: Event types to subscribe to, or ['*'] for all
         isActive:
           type: boolean
+          default: true
     Pagination:
       type: object
       properties:
@@ -347,6 +323,53 @@ components:
       - page
       - pageSize
       - totalPages
+    WebhookTestResult:
+      type: object
+      properties:
+        delivery:
+          $ref: '#/components/schemas/WebhookDelivery'
+        success:
+          type: boolean
+        error:
+          type: string
+          nullable: true
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    WebhookDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+        endpointId:
+          type: string
+        event:
+          type: string
+        payload:
+          type: string
+        statusCode:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -360,29 +383,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-  parameters:
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

@@ -195,7 +195,164 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
   schemas:
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    SavedQueryRunRequest:
+      type: object
+      properties:
+        params:
+          type: object
+          additionalProperties: true
+          description: Key-value pairs for query placeholders
+    SavedQueryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+        tags:
+          type: string
+        isPublic:
+          type: boolean
+    SavedQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        connectionId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of parameter definitions
+        tags:
+          type: string
+          nullable: true
+        isPublic:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    SavedQueryCreate:
+      type: object
+      required:
+      - name
+      - query
+      - connectionId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of { name, type, required }
+        tags:
+          type: string
+        isPublic:
+          type: boolean
+          default: true
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
     ApiMeta:
       type: object
       properties:
@@ -227,140 +384,6 @@ components:
         executionTime:
           type: number
           description: Execution time in milliseconds
-    SavedQueryCreate:
-      type: object
-      required:
-      - name
-      - query
-      - connectionId
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-          description: JSON array of { name, type, required }
-        tags:
-          type: string
-        isPublic:
-          type: boolean
-          default: true
-    SavedQueryRunRequest:
-      type: object
-      properties:
-        params:
-          type: object
-          additionalProperties: true
-          description: Key-value pairs for query placeholders
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    SavedQuery:
-      type: object
-      properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        connectionId:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-          description: JSON array of parameter definitions
-        tags:
-          type: string
-          nullable: true
-        isPublic:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    SavedQueryUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-        tags:
-          type: string
-        isPublic:
-          type: boolean
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    Pagination:
-      type: object
-      properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
-      required:
-      - total
-      - page
-      - pageSize
-      - totalPages
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -374,29 +397,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-  parameters:
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   securitySchemes:
     bearerAuth:
       type: http

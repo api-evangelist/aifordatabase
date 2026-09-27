@@ -49,9 +49,9 @@ tags:
 - Text-to-SQL
 - Dashboards
 - Business Intelligence
-- Workflow-Automation
+- Workflow Automation
 - Alerts
-- agent-native
+- Agent-Native
 - llms-txt
 - OpenAPI
 - Webhook
@@ -78,6 +78,8 @@ tags_raw:
 - PostgreSQL
 - MySQL
 - MongoDB
+- agent-native
+- Workflow-Automation
 apis:
 - aid: aifordatabase:aifordatabase-chat-api
   name: AI for Database Chat API

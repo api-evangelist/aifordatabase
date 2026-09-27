@@ -55,21 +55,23 @@ paths:
                     data:
                       $ref: '#/components/schemas/Budget'
 components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
   schemas:
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
     UsageRecord:
       type: object
       properties:
@@ -104,6 +106,36 @@ components:
       - data
       - error
       - meta
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
     Budget:
       type: object
       properties:
@@ -127,38 +159,6 @@ components:
           type: string
           format: date-time
           nullable: true
-    Pagination:
-      type: object
-      properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
-      required:
-      - total
-      - page
-      - pageSize
-      - totalPages
-  parameters:
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
   securitySchemes:
     bearerAuth:
       type: http

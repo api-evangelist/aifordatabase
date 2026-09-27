@@ -467,19 +467,8 @@ components:
         schemaError:
           type: string
           description: Present when the connection test succeeded but the automatic schema introspection failed.
-    AutoAnnotationRequest:
+    ConnectionUpdate:
       type: object
-      properties:
-        tables:
-          type: array
-          items:
-            type: string
-          description: Specific table names to annotate. Omit to annotate all tables.
-    ConnectionCreate:
-      type: object
-      required:
-      - name
-      - type
       properties:
         name:
           type: string
@@ -508,25 +497,69 @@ components:
           description: Alias of `password`.
         sslEnabled:
           type: boolean
-          default: false
           description: '`ssl` is accepted as an alias.'
-    QueryResult:
+        isActive:
+          type: boolean
+    Pagination:
       type: object
-      description: Raw database result returned directly to the authenticated caller.
       properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
+        total:
           type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    AnnotationUpdate:
+      type: object
+      properties:
+        annotation:
+          type: string
+        dataType:
+          type: string
+          nullable: true
+        examples:
+          type: string
+          nullable: true
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    QueryRequest:
+      type: object
+      required:
+      - sql
+      properties:
+        sql:
+          type: string
+          description: SQL query to execute
     Connection:
       type: object
       description: Sanitized connection metadata. Passwords, encrypted credentials, and platform secrets are never returned.
@@ -576,65 +609,23 @@ components:
         createdAt:
           type: string
           format: date-time
-    AnnotationCreate:
+    QueryResult:
       type: object
-      required:
-      - tableName
-      - annotation
+      description: Raw database result returned directly to the authenticated caller.
       properties:
-        tableName:
-          type: string
-        columnName:
-          type: string
-          nullable: true
-        annotation:
-          type: string
-        dataType:
-          type: string
-        examples:
-          type: string
-    QueryRequest:
-      type: object
-      required:
-      - sql
-      properties:
-        sql:
-          type: string
-          description: SQL query to execute
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    Pagination:
-      type: object
-      properties:
-        total:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
           type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
-      required:
-      - total
-      - page
-      - pageSize
-      - totalPages
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
     Diagnosis:
       type: object
       description: Structured failure diagnosis included in CONNECTION_FAILED / INTROSPECTION_FAILED error details.
@@ -655,32 +646,44 @@ components:
             type: string
         retryable:
           type: boolean
-    SchemaResult:
+    SuccessEnvelope:
       type: object
       properties:
-        schema:
-          type: object
-          description: Introspected database schema with tables, columns, and types
-        schemaSummary:
-          type: string
-          nullable: true
-        schemaUpdatedAt:
-          type: string
-          format: date-time
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
       required:
-      - requestId
-      - timestamp
+      - data
+      - error
+      - meta
+    AutoAnnotationResult:
+      type: object
+      properties:
+        message:
+          type: string
+        connectionId:
+          type: string
+        tables:
+          type: array
+          items:
+            type: string
+        tableCount:
+          type: integer
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     Annotation:
       type: object
       properties:
@@ -707,8 +710,46 @@ components:
         updatedAt:
           type: string
           format: date-time
-    ConnectionUpdate:
+    AnnotationCreate:
       type: object
+      required:
+      - tableName
+      - annotation
+      properties:
+        tableName:
+          type: string
+        columnName:
+          type: string
+          nullable: true
+        annotation:
+          type: string
+        dataType:
+          type: string
+        examples:
+          type: string
+    SchemaResult:
+      type: object
+      properties:
+        schema:
+          type: object
+          description: Introspected database schema with tables, columns, and types
+        schemaSummary:
+          type: string
+          nullable: true
+        schemaUpdatedAt:
+          type: string
+          format: date-time
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    ConnectionCreate:
+      type: object
+      required:
+      - name
+      - type
       properties:
         name:
           type: string
@@ -737,58 +778,49 @@ components:
           description: Alias of `password`.
         sslEnabled:
           type: boolean
+          default: false
           description: '`ssl` is accepted as an alias.'
-        isActive:
-          type: boolean
-    ApiError:
+    AutoAnnotationRequest:
       type: object
       properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    AnnotationUpdate:
-      type: object
-      properties:
-        annotation:
-          type: string
-        dataType:
-          type: string
-          nullable: true
-        examples:
-          type: string
-          nullable: true
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    AutoAnnotationResult:
-      type: object
-      properties:
-        message:
-          type: string
-        connectionId:
-          type: string
         tables:
           type: array
           items:
             type: string
-        tableCount:
-          type: integer
+          description: Specific table names to annotate. Omit to annotate all tables.
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    BadRequest:
+      description: Validation error or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
   parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
     PageSizeParam:
       name: pageSize
       in: query
@@ -804,38 +836,6 @@ components:
         type: integer
         default: 1
       description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
-  responses:
-    BadRequest:
-      description: Validation error or bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    Forbidden:
-      description: Insufficient permissions
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    Unauthorized:
-      description: Missing or invalid API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
   securitySchemes:
     bearerAuth:
       type: http
