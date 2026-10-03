@@ -191,13 +191,6 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
   parameters:
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
     IdParam:
       name: id
       in: path
@@ -205,6 +198,13 @@ components:
       schema:
         type: string
       description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -214,43 +214,20 @@ components:
         maximum: 100
       description: Items per page (max 100)
   schemas:
-    ErrorEnvelope:
+    ApiMeta:
       type: object
       properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    MetricValue:
-      type: object
-      properties:
-        value:
-          description: The computed metric value
-        unit:
+        requestId:
           type: string
-          nullable: true
-        asOf:
+          format: uuid
+        timestamp:
           type: string
           format: date-time
-        executionTime:
-          type: number
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
+        pagination:
+          $ref: '#/components/schemas/Pagination'
       required:
-      - code
-      - message
+      - requestId
+      - timestamp
     MetricCreate:
       type: object
       required:
@@ -275,18 +252,6 @@ components:
         deleted:
           type: boolean
           example: true
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     MetricDefinition:
       type: object
       properties:
@@ -316,6 +281,57 @@ components:
         updatedAt:
           type: string
           format: date-time
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    MetricUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        formula:
+          type: string
+        connectionId:
+          type: string
+        unit:
+          type: string
+        dimensions:
+          type: string
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     Pagination:
       type: object
       properties:
@@ -332,35 +348,19 @@ components:
       - page
       - pageSize
       - totalPages
-    ApiMeta:
+    MetricValue:
       type: object
       properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    MetricUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        formula:
-          type: string
-        connectionId:
-          type: string
+        value:
+          description: The computed metric value
         unit:
           type: string
-        dimensions:
+          nullable: true
+        asOf:
           type: string
+          format: date-time
+        executionTime:
+          type: number
   responses:
     BadRequest:
       description: Validation error or bad request

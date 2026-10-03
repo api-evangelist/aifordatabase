@@ -92,7 +92,46 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   schemas:
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    ApiKeyCreate:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+          default:
+          - '*'
+          description: Permission scopes — use '*' for all
+        expiresAt:
+          type: string
+          format: date-time
     ApiKeyCreated:
       type: object
       properties:
@@ -114,19 +153,6 @@ components:
         key:
           type: string
           description: Full API key — only returned at creation time
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     ApiError:
       type: object
       properties:
@@ -138,29 +164,25 @@ components:
       required:
       - code
       - message
-    ApiKeyCreate:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          type: string
-        scopes:
-          type: array
-          items:
-            type: string
-          default:
-          - '*'
-          description: Permission scopes — use '*' for all
-        expiresAt:
-          type: string
-          format: date-time
     SuccessEnvelope:
       type: object
       properties:
         data: {}
         error:
           type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
         meta:
           $ref: '#/components/schemas/ApiMeta'
       required:
@@ -205,29 +227,13 @@ components:
       - page
       - pageSize
       - totalPages
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-  parameters:
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   responses:
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
     BadRequest:
       description: Validation error or bad request
       content:
@@ -236,12 +242,6 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
     NotFound:
       description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEnvelope'
-    Forbidden:
-      description: Insufficient permissions
       content:
         application/json:
           schema:

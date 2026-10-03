@@ -196,13 +196,6 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
   parameters:
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
     IdParam:
       name: id
       in: path
@@ -210,6 +203,13 @@ components:
       schema:
         type: string
       description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -219,83 +219,20 @@ components:
         maximum: 100
       description: Items per page (max 100)
   schemas:
-    ErrorEnvelope:
+    ApiMeta:
       type: object
       properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiError:
-      type: object
-      properties:
-        code:
+        requestId:
           type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    SavedQueryRunRequest:
-      type: object
-      properties:
-        params:
-          type: object
-          additionalProperties: true
-          description: Key-value pairs for query placeholders
-    SavedQueryUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-        tags:
-          type: string
-        isPublic:
-          type: boolean
-    SavedQuery:
-      type: object
-      properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        connectionId:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-          description: JSON array of parameter definitions
-        tags:
-          type: string
-          nullable: true
-        isPublic:
-          type: boolean
-        createdAt:
+          format: uuid
+        timestamp:
           type: string
           format: date-time
-        updatedAt:
-          type: string
-          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
     DeletedResponse:
       type: object
       properties:
@@ -325,12 +262,70 @@ components:
         isPublic:
           type: boolean
           default: true
+    SavedQueryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+        tags:
+          type: string
+        isPublic:
+          type: boolean
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
     SuccessEnvelope:
       type: object
       properties:
         data: {}
         error:
           type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
         meta:
           $ref: '#/components/schemas/ApiMeta'
       required:
@@ -353,46 +348,51 @@ components:
       - page
       - pageSize
       - totalPages
-    ApiMeta:
+    SavedQueryRunRequest:
       type: object
       properties:
-        requestId:
+        params:
+          type: object
+          additionalProperties: true
+          description: Key-value pairs for query placeholders
+    SavedQuery:
+      type: object
+      properties:
+        id:
           type: string
-          format: uuid
-        timestamp:
+        orgId:
+          type: string
+        connectionId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of parameter definitions
+        tags:
+          type: string
+          nullable: true
+        isPublic:
+          type: boolean
+        createdAt:
           type: string
           format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    QueryResult:
-      type: object
-      description: Raw database result returned directly to the authenticated caller.
-      properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
-          type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
+        updatedAt:
+          type: string
+          format: date-time
   responses:
-    BadRequest:
-      description: Validation error or bad request
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: Resource not found
+    BadRequest:
+      description: Validation error or bad request
       content:
         application/json:
           schema:
