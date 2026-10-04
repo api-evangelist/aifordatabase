@@ -449,73 +449,6 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
   schemas:
-    AutoAnnotationResult:
-      type: object
-      properties:
-        message:
-          type: string
-        connectionId:
-          type: string
-        tables:
-          type: array
-          items:
-            type: string
-        tableCount:
-          type: integer
-    Diagnosis:
-      type: object
-      description: Structured failure diagnosis included in CONNECTION_FAILED / INTROSPECTION_FAILED error details.
-      properties:
-        stage:
-          type: string
-          description: 'Where it failed: RESOLVE, CONNECT, TLS, AUTH, READ_SCHEMA, ...'
-        fault:
-          type: string
-          description: 'Whose problem it is: user, server, third-party, us'
-        title:
-          type: string
-        explanation:
-          type: string
-        fixSteps:
-          type: array
-          items:
-            type: string
-        retryable:
-          type: boolean
-    AnnotationCreate:
-      type: object
-      required:
-      - tableName
-      - annotation
-      properties:
-        tableName:
-          type: string
-        columnName:
-          type: string
-          nullable: true
-        annotation:
-          type: string
-        dataType:
-          type: string
-        examples:
-          type: string
-    QueryResult:
-      type: object
-      description: Raw database result returned directly to the authenticated caller.
-      properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
-          type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
     SuccessEnvelope:
       type: object
       properties:
@@ -528,64 +461,66 @@ components:
       - data
       - error
       - meta
-    Annotation:
+    ConnectionUpdate:
       type: object
       properties:
-        id:
+        name:
           type: string
-        connectionId:
+        type:
           type: string
-        tableName:
+          enum:
+          - POSTGRES
+          - MYSQL
+          - MARIADB
+          - MSSQL
+          - MONGODB
+          - SQLITE
+        host:
           type: string
-        columnName:
-          type: string
-          nullable: true
-        annotation:
-          type: string
-        dataType:
-          type: string
-          nullable: true
-        examples:
-          type: string
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    TestResult:
-      type: object
-      properties:
-        success:
-          type: boolean
-        latency:
-          type: number
-        message:
-          type: string
-        schemaIntrospected:
-          type: boolean
-          description: True when this test also introspected and cached the schema (first successful test on a connection with no schema).
-        tableCount:
+        port:
           type: integer
-          description: Number of tables found, when schemaIntrospected is true.
-        schemaError:
+        database:
           type: string
-          description: Present when the connection test succeeded but the automatic schema introspection failed.
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
+        username:
+          type: string
+        password:
+          type: string
+          description: Database password (write-only, never returned). `encryptedPassword` is accepted as an alias.
+        encryptedPassword:
+          type: string
+          description: Alias of `password`.
+        sslEnabled:
           type: boolean
-          example: true
-    AutoAnnotationRequest:
+          description: '`ssl` is accepted as an alias.'
+        isActive:
+          type: boolean
+    ErrorEnvelope:
       type: object
       properties:
-        tables:
-          type: array
-          items:
-            type: string
-          description: Specific table names to annotate. Omit to annotate all tables.
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
     ConnectionCreate:
       type: object
       required:
@@ -621,30 +556,6 @@ components:
           type: boolean
           default: false
           description: '`ssl` is accepted as an alias.'
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     Connection:
       type: object
       description: Sanitized connection metadata. Passwords, encrypted credentials, and platform secrets are never returned.
@@ -694,64 +605,46 @@ components:
         createdAt:
           type: string
           format: date-time
-    ApiMeta:
+    ApiError:
       type: object
       properties:
-        requestId:
+        code:
           type: string
-          format: uuid
-        timestamp:
+        message:
           type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
+        details: {}
       required:
-      - requestId
-      - timestamp
-    QueryRequest:
+      - code
+      - message
+    QueryResult:
       type: object
-      required:
-      - sql
+      description: Raw database result returned directly to the authenticated caller.
       properties:
-        sql:
-          type: string
-          description: SQL query to execute
-    ConnectionUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        type:
-          type: string
-          enum:
-          - POSTGRES
-          - MYSQL
-          - MARIADB
-          - MSSQL
-          - MONGODB
-          - SQLITE
-        host:
-          type: string
-        port:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
           type: integer
-        database:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-          description: Database password (write-only, never returned). `encryptedPassword` is accepted as an alias.
-        encryptedPassword:
-          type: string
-          description: Alias of `password`.
-        sslEnabled:
-          type: boolean
-          description: '`ssl` is accepted as an alias.'
-        isActive:
-          type: boolean
-    AnnotationUpdate:
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+    Annotation:
       type: object
       properties:
+        id:
+          type: string
+        connectionId:
+          type: string
+        tableName:
+          type: string
+        columnName:
+          type: string
+          nullable: true
         annotation:
           type: string
         dataType:
@@ -760,6 +653,12 @@ components:
         examples:
           type: string
           nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     SchemaResult:
       type: object
       properties:
@@ -772,6 +671,35 @@ components:
         schemaUpdatedAt:
           type: string
           format: date-time
+    AutoAnnotationRequest:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: Specific table names to annotate. Omit to annotate all tables.
+    AutoAnnotationResult:
+      type: object
+      properties:
+        message:
+          type: string
+        connectionId:
+          type: string
+        tables:
+          type: array
+          items:
+            type: string
+        tableCount:
+          type: integer
+    QueryRequest:
+      type: object
+      required:
+      - sql
+      properties:
+        sql:
+          type: string
+          description: SQL query to execute
     Pagination:
       type: object
       properties:
@@ -788,14 +716,79 @@ components:
       - page
       - pageSize
       - totalPages
+    AnnotationUpdate:
+      type: object
+      properties:
+        annotation:
+          type: string
+        dataType:
+          type: string
+          nullable: true
+        examples:
+          type: string
+          nullable: true
+    TestResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        latency:
+          type: number
+        message:
+          type: string
+        schemaIntrospected:
+          type: boolean
+          description: True when this test also introspected and cached the schema (first successful test on a connection with no schema).
+        tableCount:
+          type: integer
+          description: Number of tables found, when schemaIntrospected is true.
+        schemaError:
+          type: string
+          description: Present when the connection test succeeded but the automatic schema introspection failed.
+    AnnotationCreate:
+      type: object
+      required:
+      - tableName
+      - annotation
+      properties:
+        tableName:
+          type: string
+        columnName:
+          type: string
+          nullable: true
+        annotation:
+          type: string
+        dataType:
+          type: string
+        examples:
+          type: string
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    Diagnosis:
+      type: object
+      description: Structured failure diagnosis included in CONNECTION_FAILED / INTROSPECTION_FAILED error details.
+      properties:
+        stage:
+          type: string
+          description: 'Where it failed: RESOLVE, CONNECT, TLS, AUTH, READ_SCHEMA, ...'
+        fault:
+          type: string
+          description: 'Whose problem it is: user, server, third-party, us'
+        title:
+          type: string
+        explanation:
+          type: string
+        fixSteps:
+          type: array
+          items:
+            type: string
+        retryable:
+          type: boolean
   parameters:
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
     PageSizeParam:
       name: pageSize
       in: query
@@ -811,15 +804,22 @@ components:
         type: integer
         default: 1
       description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   responses:
-    Forbidden:
-      description: Insufficient permissions
+    BadRequest:
+      description: Validation error or bad request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    BadRequest:
-      description: Validation error or bad request
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
@@ -830,8 +830,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: Resource not found
+    Forbidden:
+      description: Insufficient permissions
       content:
         application/json:
           schema:

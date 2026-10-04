@@ -56,43 +56,6 @@ paths:
                       $ref: '#/components/schemas/Budget'
 components:
   schemas:
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    Budget:
-      type: object
-      properties:
-        included:
-          type: integer
-          description: Included budget in cents
-        topUp:
-          type: integer
-          description: Top-up budget in cents
-        used:
-          type: integer
-          description: Used budget in cents
-        remaining:
-          type: integer
-          description: Remaining budget in cents
-        periodStart:
-          type: string
-          format: date-time
-          nullable: true
-        periodEnd:
-          type: string
-          format: date-time
-          nullable: true
     UsageRecord:
       type: object
       properties:
@@ -143,14 +106,44 @@ components:
       - page
       - pageSize
       - totalPages
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    Budget:
+      type: object
+      properties:
+        included:
+          type: integer
+          description: Included budget in cents
+        topUp:
+          type: integer
+          description: Top-up budget in cents
+        used:
+          type: integer
+          description: Used budget in cents
+        remaining:
+          type: integer
+          description: Remaining budget in cents
+        periodStart:
+          type: string
+          format: date-time
+          nullable: true
+        periodEnd:
+          type: string
+          format: date-time
+          nullable: true
   parameters:
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -159,6 +152,13 @@ components:
         default: 20
         maximum: 100
       description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
   securitySchemes:
     bearerAuth:
       type: http

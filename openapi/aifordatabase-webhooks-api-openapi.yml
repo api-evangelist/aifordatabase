@@ -187,96 +187,30 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 components:
+  parameters:
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   schemas:
-    WebhookTestResult:
-      type: object
-      properties:
-        delivery:
-          $ref: '#/components/schemas/WebhookDelivery'
-        success:
-          type: boolean
-        error:
-          type: string
-          nullable: true
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
-    WebhookDelivery:
-      type: object
-      properties:
-        id:
-          type: string
-        endpointId:
-          type: string
-        event:
-          type: string
-        payload:
-          type: string
-        statusCode:
-          type: integer
-          nullable: true
-        attempts:
-          type: integer
-        deliveredAt:
-          type: string
-          format: date-time
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     WebhookEndpoint:
       type: object
       properties:
@@ -302,6 +236,34 @@ components:
         updatedAt:
           type: string
           format: date-time
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
     WebhookEndpointCreate:
       type: object
       required:
@@ -319,6 +281,59 @@ components:
         isActive:
           type: boolean
           default: true
+    WebhookTestResult:
+      type: object
+      properties:
+        delivery:
+          $ref: '#/components/schemas/WebhookDelivery'
+        success:
+          type: boolean
+        error:
+          type: string
+          nullable: true
+    WebhookDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+        endpointId:
+          type: string
+        event:
+          type: string
+        payload:
+          type: string
+        statusCode:
+          type: integer
+          nullable: true
+        attempts:
+          type: integer
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    DeletedResponse:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
     WebhookEndpointUpdate:
       type: object
       properties:
@@ -331,54 +346,39 @@ components:
             type: string
         isActive:
           type: boolean
-    Pagination:
+    ErrorEnvelope:
       type: object
       properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
       required:
-      - total
-      - page
-      - pageSize
-      - totalPages
-  parameters:
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
   responses:
-    BadRequest:
-      description: Validation error or bad request
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: Resource not found
+    BadRequest:
+      description: Validation error or bad request
       content:
         application/json:
           schema:

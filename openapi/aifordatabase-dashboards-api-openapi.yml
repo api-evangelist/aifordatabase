@@ -282,20 +282,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   parameters:
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -304,9 +290,25 @@ components:
         default: 20
         maximum: 100
       description: Items per page (max 100)
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
   schemas:
-    DashboardUpdate:
+    DashboardCreate:
       type: object
+      required:
+      - title
       properties:
         title:
           type: string
@@ -314,37 +316,42 @@ components:
           type: string
         isPublic:
           type: boolean
-    ApiMeta:
+          default: false
+    SuccessEnvelope:
       type: object
       properties:
-        requestId:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    Dashboard:
+      type: object
+      properties:
+        id:
           type: string
-          format: uuid
-        timestamp:
+        orgId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        isPublic:
+          type: boolean
+        createdAt:
           type: string
           format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    ApiError:
-      type: object
-      properties:
-        code:
+        updatedAt:
           type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
+          format: date-time
+        widgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Widget'
     QueryResult:
       type: object
       description: Raw database result returned directly to the authenticated caller.
@@ -362,31 +369,6 @@ components:
         executionTime:
           type: number
           description: Execution time in milliseconds
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     Pagination:
       type: object
       properties:
@@ -403,18 +385,31 @@ components:
       - page
       - pageSize
       - totalPages
-    DashboardCreate:
+    WidgetCreate:
       type: object
       required:
+      - type
       - title
       properties:
+        type:
+          type: string
         title:
           type: string
-        description:
+        query:
           type: string
-        isPublic:
-          type: boolean
-          default: false
+        connectionId:
+          type: string
+        config:
+          type: string
+        width:
+          type: integer
+          default: 6
+        height:
+          type: integer
+          default: 4
+        position:
+          type: integer
+          default: 0
     Widget:
       type: object
       properties:
@@ -445,6 +440,15 @@ components:
         updatedAt:
           type: string
           format: date-time
+    DashboardUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        isPublic:
+          type: boolean
     WidgetUpdate:
       type: object
       properties:
@@ -460,54 +464,50 @@ components:
           type: integer
         position:
           type: integer
-    WidgetCreate:
-      type: object
-      required:
-      - type
-      - title
-      properties:
-        type:
-          type: string
-        title:
-          type: string
-        query:
-          type: string
-        connectionId:
-          type: string
-        config:
-          type: string
-        width:
-          type: integer
-          default: 6
-        height:
-          type: integer
-          default: 4
-        position:
-          type: integer
-          default: 0
-    Dashboard:
+    DeletedResponse:
       type: object
       properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        title:
-          type: string
-        description:
-          type: string
-        isPublic:
+        deleted:
           type: boolean
-        createdAt:
+          example: true
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
           type: string
           format: date-time
-        updatedAt:
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
           type: string
-          format: date-time
-        widgets:
-          type: array
-          items:
-            $ref: '#/components/schemas/Widget'
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
   responses:
     NotFound:
       description: Resource not found
