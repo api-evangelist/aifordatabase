@@ -612,6 +612,9 @@ apis:
   - type: LLMsTxt
     url: llms/aifordatabase-llms.txt
 common:
+- type: CapabilityMap
+  url: capabilities/aifordatabase-capability-edges.yml
+  name: AI for Database Business Capability Map
 - type: Website
   url: https://www.aifordatabase.com/
 - type: Overlay
