@@ -1,0 +1,12 @@
+{
+ "url": "https://www.aifordatabase.com/openapi.json",
+ "requested_url": "https://www.aifordatabase.com/openapi.json",
+ "status": 200,
+ "content_type": "application/json",
+ "bytes": 89868,
+ "sha256": "aa0d776b57b5781715a4f35da8e88ded718371720f816263af4d5f7d1702d938",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "equivalent",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the provider's current document describes the same operations (Jaccard 0.988), but the bytes differ, so the archive is an earlier or reformatted copy."
+}
