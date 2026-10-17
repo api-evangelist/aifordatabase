@@ -168,6 +168,20 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -176,33 +190,48 @@ components:
         default: 20
         maximum: 100
       description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   schemas:
-    SuccessEnvelope:
+    ApiMeta:
       type: object
       properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
       required:
-      - data
-      - error
-      - meta
+      - requestId
+      - timestamp
+    ConversationCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        connectionId:
+          type: string
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        userId:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     ConversationUpdate:
       type: object
       required:
@@ -210,22 +239,6 @@ components:
       properties:
         title:
           type: string
-    Pagination:
-      type: object
-      properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
-      required:
-      - total
-      - page
-      - pageSize
-      - totalPages
     ErrorEnvelope:
       type: object
       properties:
@@ -250,26 +263,34 @@ components:
       required:
       - code
       - message
-    DeletedResponse:
+    Pagination:
       type: object
       properties:
-        deleted:
-          type: boolean
-          example: true
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
       required:
-      - requestId
-      - timestamp
+      - total
+      - page
+      - pageSize
+      - totalPages
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     Message:
       type: object
       properties:
@@ -302,33 +323,12 @@ components:
         createdAt:
           type: string
           format: date-time
-    Conversation:
+    DeletedResponse:
       type: object
       properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        userId:
-          type: string
-        connectionId:
-          type: string
-          nullable: true
-        title:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    ConversationCreate:
-      type: object
-      properties:
-        title:
-          type: string
-        connectionId:
-          type: string
+        deleted:
+          type: boolean
+          example: true
   responses:
     NotFound:
       description: Resource not found

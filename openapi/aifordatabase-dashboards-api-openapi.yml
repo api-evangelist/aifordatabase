@@ -282,6 +282,20 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -290,45 +304,24 @@ components:
         default: 20
         maximum: 100
       description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   schemas:
-    DashboardCreate:
+    QueryResult:
       type: object
-      required:
-      - title
+      description: Raw database result returned directly to the authenticated caller.
       properties:
-        title:
-          type: string
-        description:
-          type: string
-        isPublic:
-          type: boolean
-          default: false
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
     Dashboard:
       type: object
       properties:
@@ -352,23 +345,98 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Widget'
-    QueryResult:
+    ApiMeta:
       type: object
-      description: Raw database result returned directly to the authenticated caller.
       properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    WidgetUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        query:
+          type: string
+        config:
+          type: string
+        width:
           type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
+        height:
+          type: integer
+        position:
+          type: integer
+    Widget:
+      type: object
+      properties:
+        id:
+          type: string
+        dashboardId:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        type:
+          type: string
+        title:
+          type: string
+        query:
+          type: string
+        config:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        position:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DashboardUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        isPublic:
+          type: boolean
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
     Pagination:
       type: object
       properties:
@@ -410,38 +478,28 @@ components:
         position:
           type: integer
           default: 0
-    Widget:
+    SuccessEnvelope:
       type: object
       properties:
-        id:
-          type: string
-        dashboardId:
-          type: string
-        connectionId:
-          type: string
-          nullable: true
-        type:
-          type: string
-        title:
-          type: string
-        query:
-          type: string
-        config:
-          type: string
-        width:
-          type: integer
-        height:
-          type: integer
-        position:
-          type: integer
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    DashboardUpdate:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    DeletedResponse:
       type: object
+      properties:
+        deleted:
+          type: boolean
+          example: true
+    DashboardCreate:
+      type: object
+      required:
+      - title
       properties:
         title:
           type: string
@@ -449,65 +507,7 @@ components:
           type: string
         isPublic:
           type: boolean
-    WidgetUpdate:
-      type: object
-      properties:
-        title:
-          type: string
-        query:
-          type: string
-        config:
-          type: string
-        width:
-          type: integer
-        height:
-          type: integer
-        position:
-          type: integer
-    DeletedResponse:
-      type: object
-      properties:
-        deleted:
-          type: boolean
-          example: true
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
-      required:
-      - code
-      - message
+          default: false
   responses:
     NotFound:
       description: Resource not found

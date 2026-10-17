@@ -195,29 +195,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 components:
-  parameters:
-    PageSizeParam:
-      name: pageSize
-      in: query
-      schema:
-        type: integer
-        default: 20
-        maximum: 100
-      description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   schemas:
     SavedQueryRunRequest:
       type: object
@@ -226,70 +203,6 @@ components:
           type: object
           additionalProperties: true
           description: Key-value pairs for query placeholders
-    SavedQuery:
-      type: object
-      properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        connectionId:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-          description: JSON array of parameter definitions
-        tags:
-          type: string
-          nullable: true
-        isPublic:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    SavedQueryCreate:
-      type: object
-      required:
-      - name
-      - query
-      - connectionId
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        connectionId:
-          type: string
-        query:
-          type: string
-        parameters:
-          type: string
-          description: JSON array of { name, type, required }
-        tags:
-          type: string
-        isPublic:
-          type: boolean
-          default: true
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
     QueryResult:
       type: object
       description: Raw database result returned directly to the authenticated caller.
@@ -307,12 +220,44 @@ components:
         executionTime:
           type: number
           description: Execution time in milliseconds
-    DeletedResponse:
+    ApiMeta:
       type: object
       properties:
-        deleted:
-          type: boolean
-          example: true
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+      required:
+      - code
+      - message
     Pagination:
       type: object
       properties:
@@ -346,44 +291,99 @@ components:
           type: string
         isPublic:
           type: boolean
-    ErrorEnvelope:
+    SuccessEnvelope:
       type: object
       properties:
-        data:
-          type: 'null'
+        data: {}
         error:
-          $ref: '#/components/schemas/ApiError'
+          type: 'null'
         meta:
           $ref: '#/components/schemas/ApiMeta'
       required:
       - data
       - error
       - meta
-    ApiMeta:
+    SavedQuery:
       type: object
       properties:
-        requestId:
+        id:
           type: string
-          format: uuid
-        timestamp:
+        orgId:
+          type: string
+        connectionId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of parameter definitions
+        tags:
+          type: string
+          nullable: true
+        isPublic:
+          type: boolean
+        createdAt:
           type: string
           format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
-    ApiError:
+        updatedAt:
+          type: string
+          format: date-time
+    DeletedResponse:
       type: object
       properties:
-        code:
-          type: string
-        message:
-          type: string
-        details: {}
+        deleted:
+          type: boolean
+          example: true
+    SavedQueryCreate:
+      type: object
       required:
-      - code
-      - message
+      - name
+      - query
+      - connectionId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        connectionId:
+          type: string
+        query:
+          type: string
+        parameters:
+          type: string
+          description: JSON array of { name, type, required }
+        tags:
+          type: string
+        isPublic:
+          type: boolean
+          default: true
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      description: Items per page (max 100)
   responses:
     NotFound:
       description: Resource not found

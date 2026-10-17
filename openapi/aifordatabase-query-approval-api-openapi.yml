@@ -310,58 +310,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 components:
   schemas:
-    QuerySubmitRequest:
-      type: object
-      required:
-      - connectionId
-      - query
-      properties:
-        connectionId:
-          type: string
-        query:
-          type: string
-        context:
-          type: string
-          description: Optional description of why this query needs to run
-    SuccessEnvelope:
-      type: object
-      properties:
-        data: {}
-        error:
-          type: 'null'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ErrorEnvelope:
-      type: object
-      properties:
-        data:
-          type: 'null'
-        error:
-          $ref: '#/components/schemas/ApiError'
-        meta:
-          $ref: '#/components/schemas/ApiMeta'
-      required:
-      - data
-      - error
-      - meta
-    ApiMeta:
-      type: object
-      properties:
-        requestId:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      required:
-      - requestId
-      - timestamp
     ApiError:
       type: object
       properties:
@@ -373,74 +321,6 @@ components:
       required:
       - code
       - message
-    QueryResult:
-      type: object
-      description: Raw database result returned directly to the authenticated caller.
-      properties:
-        columns:
-          type: array
-          items:
-            type: string
-        rows:
-          type: array
-          items:
-            type: object
-        rowCount:
-          type: integer
-        executionTime:
-          type: number
-          description: Execution time in milliseconds
-    ApproveRejectRequest:
-      type: object
-      properties:
-        note:
-          type: string
-          description: Optional reviewer note
-    ApprovalRuleCreate:
-      type: object
-      required:
-      - approvers
-      properties:
-        connectionId:
-          type: string
-        scope:
-          type: string
-          default: all
-        approvers:
-          type: array
-          items:
-            type: string
-          description: User IDs of authorized approvers
-    ApprovalRuleUpdate:
-      type: object
-      properties:
-        connectionId:
-          type: string
-          nullable: true
-        scope:
-          type: string
-        approvers:
-          type: array
-          items:
-            type: string
-        isActive:
-          type: boolean
-    Pagination:
-      type: object
-      properties:
-        total:
-          type: integer
-        page:
-          type: integer
-        pageSize:
-          type: integer
-        totalPages:
-          type: integer
-      required:
-      - total
-      - page
-      - pageSize
-      - totalPages
     ApprovalResult:
       type: object
       properties:
@@ -458,6 +338,109 @@ components:
           nullable: true
         result:
           $ref: '#/components/schemas/QueryResult'
+    ApprovalRule:
+      type: object
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        connectionId:
+          type: string
+          nullable: true
+        scope:
+          type: string
+        approvers:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ApprovalRuleCreate:
+      type: object
+      required:
+      - approvers
+      properties:
+        connectionId:
+          type: string
+        scope:
+          type: string
+          default: all
+        approvers:
+          type: array
+          items:
+            type: string
+          description: User IDs of authorized approvers
+    ApiMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - requestId
+      - timestamp
+    QuerySubmitRequest:
+      type: object
+      required:
+      - connectionId
+      - query
+      properties:
+        connectionId:
+          type: string
+        query:
+          type: string
+        context:
+          type: string
+          description: Optional description of why this query needs to run
+    ApproveRejectRequest:
+      type: object
+      properties:
+        note:
+          type: string
+          description: Optional reviewer note
+    ApprovalRuleUpdate:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          nullable: true
+        scope:
+          type: string
+        approvers:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+    QueryResult:
+      type: object
+      description: Raw database result returned directly to the authenticated caller.
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        rowCount:
+          type: integer
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
     PendingQuery:
       type: object
       properties:
@@ -498,30 +481,47 @@ components:
         createdAt:
           type: string
           format: date-time
-    ApprovalRule:
+    Pagination:
       type: object
       properties:
-        id:
-          type: string
-        orgId:
-          type: string
-        connectionId:
-          type: string
-          nullable: true
-        scope:
-          type: string
-        approvers:
-          type: array
-          items:
-            type: string
-        isActive:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+      required:
+      - total
+      - page
+      - pageSize
+      - totalPages
+    ErrorEnvelope:
+      type: object
+      properties:
+        data:
+          type: 'null'
+        error:
+          $ref: '#/components/schemas/ApiError'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
+    SuccessEnvelope:
+      type: object
+      properties:
+        data: {}
+        error:
+          type: 'null'
+        meta:
+          $ref: '#/components/schemas/ApiMeta'
+      required:
+      - data
+      - error
+      - meta
     DeletedResponse:
       type: object
       properties:
@@ -529,6 +529,20 @@ components:
           type: boolean
           example: true
   parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Resource ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Page number (1-based)
     PageSizeParam:
       name: pageSize
       in: query
@@ -537,20 +551,6 @@ components:
         default: 20
         maximum: 100
       description: Items per page (max 100)
-    PageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        default: 1
-      description: Page number (1-based)
-    IdParam:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Resource ID
   responses:
     BadRequest:
       description: Validation error or bad request
@@ -558,14 +558,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    NotFound:
-      description: Resource not found
+    Forbidden:
+      description: Insufficient permissions
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
-    Forbidden:
-      description: Insufficient permissions
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
