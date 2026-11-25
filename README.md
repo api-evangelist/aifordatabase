@@ -66,7 +66,7 @@
 
 AI for Database is a natural-language data layer for operational databases, built by Wavicle.tech. It connects read-only to PostgreSQL, MySQL, MariaDB, SQL Server, MongoDB, SQLite and Google Sheets, translates plain-English questions into SQL, returns the SQL alongside the answer, pins results as self-refreshing dashboards, and runs scheduled workflows that fire email, webhook or Slack alerts when a query condition becomes true. The public REST API is explicitly designed for AI agents: a scoped Bearer-auth contract (afd_ keys, nine permission scopes) documented by a live OpenAPI 3.1 spec with 80 operations, a paused-draft workflow lifecycle with a real dry-run preview and a confirmation-gated live action test, human query approval, and agent-native discovery surfaces at llms.txt, llms-full.txt and a JSON capability manifest.
 
-**Areas:** Artificial Intelligence · Database · Analytics · Developer Tools · Natural Language Query · Text-to-SQL · Dashboards · Business Intelligence · Workflow Automation · Alerts · Agent-Native · llms-txt
+**Areas:** Artificial Intelligence · Database · Analytics · Developer Tools · Natural Language Query · Text-to-SQL · Dashboards · Business Intelligence · Workflow Automation · Alerts · Agent-Native · llms.txt
 
 ## AI for Database on APIs.io
 
@@ -107,27 +107,40 @@ Model Context Protocol servers that expose the API to agents.
 
 OpenAPI overlays, including conversational phrasing for each operation.
 
-- [Aifordatabase Openapi Overlay](https://apis.io/overlays/aifordatabase/aifordatabase-openapi-overlay/)
+- [AI for Database Openapi Overlay](https://apis.io/overlays/aifordatabase/aifordatabase-openapi-overlay/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [AI for Database API Rules](https://apis.io/rules/aifordatabase/aifordatabase-rules/)
 
 #### Security (3)
 
 Authentication, trust centre, and vulnerability disclosure.
 
-- [Aifordatabase Authentication](https://apis.io/security/aifordatabase/aifordatabase-authentication/)
-- [Aifordatabase Domain Security](https://apis.io/security/aifordatabase/aifordatabase-domain-security/)
-- [Aifordatabase Trust Center](https://apis.io/security/aifordatabase/aifordatabase-trust-center/)
+- [AI for Database Authentication](https://apis.io/security/aifordatabase/aifordatabase-authentication/)
+- [AI for Database Domain Security](https://apis.io/security/aifordatabase/aifordatabase-domain-security/)
+- [AI for Database Trust Center](https://apis.io/security/aifordatabase/aifordatabase-trust-center/)
 
-#### Plans and pricing (1)
+#### Plans and pricing (2)
 
 Published plans, tiers and prices.
 
-- [Aifordatabase Plans Pricing](https://apis.io/plans/aifordatabase/aifordatabase-plans-pricing/)
+- [AI for Database Plans Pricing](https://apis.io/plans/aifordatabase/aifordatabase-plans-pricing/)
+- [AI for Database Price Estimates](https://apis.io/plans/aifordatabase/aifordatabase-price-estimates/)
 
 #### Rate limits (1)
 
 Published request limits.
 
-- [Aifordatabase Rate Limits](https://apis.io/rate-limits/aifordatabase/aifordatabase-rate-limits/)
+- [AI for Database Rate Limits](https://apis.io/rate-limits/aifordatabase/aifordatabase-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [AI for Database Finops](https://apis.io/finops/aifordatabase/aifordatabase-finops/)
 
 ## Where to find this API
 
@@ -147,18 +160,18 @@ Links to the company's own pages. This repository publishes no copy of their spe
 
 ## API Evangelist rating
 
-**Kin Score 60.3** — strong · rubric 0.25.0 · scored 2026-10-23
+**Kin Score 62.7** — strong · rubric 0.28.1 · scored 2026-11-21
 
 | Facet | Score |
 |---|---|
 | Discoverability | 71.7 |
-| Contract quality | 61.4 |
-| Contract governance | 4.5 |
-| Operational transparency | 39.5 |
+| Contract quality | 67.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 35.7 |
 | Developer ergonomics | 66.1 |
-| Access clarity | 77.6 |
+| Access clarity | 80.9 |
 
-**Agent readiness 36.3** — agent-ready
+**Agent readiness 36.0** — agent-ready
 
 | Agent-readiness dimension | Result |
 |---|---|
@@ -183,8 +196,12 @@ Links to the company's own pages. This repository publishes no copy of their spe
 | Agentic Commerce | — |
 | Pagination Ratio | na |
 | Operation Distinctiveness | distinct |
+| MCP Tool Quality | na |
+| Onboarding Descriptor | — |
+| Dns Aid Index | na |
+| Markdown Negotiation | yes |
 
-**Regulatory alignment 27.3** — Horizontal (data, software, accessibility, platform)
+**Regulatory alignment 21.8** — Horizontal (data, software, accessibility, platform)
 
 The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/aifordatabase/](https://apis.io/providers/aifordatabase/).
 
